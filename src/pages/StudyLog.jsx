@@ -9,7 +9,7 @@ import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
 import { getData, saveData } from '../utils/localStorage';
 
-const subjects = { Japanese: 'purple', Programming: 'blue', Math: 'green', Other: 'gray' };
+const subjects = { Japanese: 'purple', Homework: 'blue', Math: 'green', Other: 'gray' };
 const SUBJECTS = Object.keys(subjects);
 
 const defaultForm = { subject: 'Japanese', duration: '', notes: '', rating: 4, date: new Date().toISOString().split('T')[0] };
