@@ -37,10 +37,10 @@ export const mockJapanese = {
 
 export const mockStudyLog = [
   { id: 1, subject: 'Japanese', duration: 45, date: '2026-03-25', notes: 'Reviewed N3 grammar patterns', rating: 4 },
-  { id: 2, subject: 'Programming', duration: 120, date: '2026-03-25', notes: 'Worked on React components', rating: 5 },
+  { id: 2, subject: 'Homework', duration: 120, date: '2026-03-25', notes: 'Completed homework assignments', rating: 5 },
   { id: 3, subject: 'Japanese', duration: 30, date: '2026-03-24', notes: 'Vocabulary flashcards', rating: 3 },
   { id: 4, subject: 'Math', duration: 60, date: '2026-03-23', notes: 'Calculus practice problems', rating: 4 },
-  { id: 5, subject: 'Programming', duration: 90, date: '2026-03-22', notes: 'Learned about React hooks', rating: 5 },
+  { id: 5, subject: 'Homework', duration: 90, date: '2026-03-22', notes: 'Worked through homework exercises', rating: 5 },
 ];
 
 export const mockMoodLog = [
