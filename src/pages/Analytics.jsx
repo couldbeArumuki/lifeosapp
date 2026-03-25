@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import Card from '../components/Card';
-import { getData, initializeData } from '../utils/localStorage';
-import { allMockData, mockWeeklyData } from '../data/mockData';
+import { getData } from '../utils/localStorage';
+import { computeWeeklyData } from '../utils/localStorage';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#6B9BD1', '#B19CD9', '#7EC8A3', '#F4A6C1'];
 
 const Analytics = () => {
-  const [studyLog] = useState(() => { initializeData(allMockData); return getData('studyLog', []); });
+  const [studyLog] = useState(() => getData('studyLog', []));
   const [moodLog] = useState(() => getData('moodLog', []));
   const [sleepLog] = useState(() => getData('sleepLog', []));
+  const [tasks] = useState(() => getData('tasks', []));
+
+  const weeklyData = computeWeeklyData(studyLog, tasks, moodLog);
 
   const subjectData = studyLog.reduce((acc, s) => {
     const found = acc.find(a => a.name === s.subject);
@@ -72,7 +75,7 @@ const Analytics = () => {
         <Card>
           <h3 className="font-heading font-semibold mb-4 text-text-dark dark:text-text-light">Weekly Overview</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={mockWeeklyData}>
+            <BarChart data={weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="day" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />

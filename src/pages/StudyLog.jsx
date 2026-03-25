@@ -7,8 +7,7 @@ import Modal from '../components/Modal';
 import Input from '../components/Input';
 import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
-import { getData, saveData, initializeData } from '../utils/localStorage';
-import { allMockData } from '../data/mockData';
+import { getData, saveData } from '../utils/localStorage';
 
 const subjects = { Japanese: 'purple', Programming: 'blue', Math: 'green', Other: 'gray' };
 const SUBJECTS = Object.keys(subjects);
@@ -17,7 +16,6 @@ const defaultForm = { subject: 'Japanese', duration: '', notes: '', rating: 4, d
 
 const StudyLog = () => {
   const [logs, setLogs] = useState(() => {
-    initializeData(allMockData);
     return getData('studyLog', []);
   });
   const [showModal, setShowModal] = useState(false);
@@ -65,6 +63,14 @@ const StudyLog = () => {
   const weekStartStr = weekStart.toISOString().split('T')[0];
   const weeklyMin = logs.filter(l => l.date >= weekStartStr).reduce((s, l) => s + l.duration, 0);
 
+  // Weekly summary by subject
+  const weeklyBySubject = logs
+    .filter(l => l.date >= weekStartStr)
+    .reduce((acc, l) => {
+      acc[l.subject] = (acc[l.subject] || 0) + l.duration;
+      return acc;
+    }, {});
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -76,6 +82,22 @@ const StudyLog = () => {
         </div>
         <Button variant="primary" onClick={openAdd}><Plus size={16} /> Log Session</Button>
       </div>
+
+      {Object.keys(weeklyBySubject).length > 0 && (
+        <Card>
+          <h3 className="font-heading font-semibold text-text-dark dark:text-text-light mb-3 text-sm">This Week by Subject</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {Object.entries(weeklyBySubject).map(([subject, minutes]) => (
+              <div key={subject} className="text-center p-3 rounded-xl bg-gray-50 dark:bg-white/5">
+                <Badge color={subjects[subject] || 'gray'}>{subject}</Badge>
+                <p className="font-mono font-bold text-text-dark dark:text-text-light mt-2">
+                  {Math.floor(minutes / 60)}h {Math.floor(minutes % 60)}m
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid gap-3">
         {logs.length === 0 && (

@@ -3,12 +3,15 @@ import { Plus, Star, BookOpen, TrendingUp } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
-import { getData, initializeData } from '../utils/localStorage';
-import { allMockData } from '../data/mockData';
+import { getData } from '../utils/localStorage';
 
 const JapaneseLearning = () => {
-  const [data] = useState(() => { initializeData(allMockData); return getData('japanese', null); });
-  if (!data) return null;
+  const [data] = useState(() => getData('japanese', null));
+  if (!data) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-gray-400">No Japanese learning data yet.</p>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
