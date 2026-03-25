@@ -5,7 +5,7 @@ import {
   Activity, Trophy, BarChart3, Globe, Menu, X, Sun, Moon,
   ChevronRight
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -51,22 +51,25 @@ const DashboardLayout = ({ children }) => {
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map(({ path, label, icon: Icon }) => (
-            <Link
-              key={path}
-              to={path}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                isActive(path)
-                  ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-dark dark:hover:text-text-light'
-              }`}
-            >
-              <Icon size={18} />
-              <span className="flex-1">{label}</span>
-              {isActive(path) && <ChevronRight size={14} />}
-            </Link>
-          ))}
+          {navItems.map(({ path, label, icon }) => {
+            const NavIcon = icon;
+            return (
+              <Link
+                key={path}
+                to={path}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                  isActive(path)
+                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-dark dark:hover:text-text-light'
+                }`}
+              >
+                <NavIcon size={18} />
+                <span className="flex-1">{label}</span>
+                {isActive(path) && <ChevronRight size={14} />}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-gray-100 dark:border-white/10">

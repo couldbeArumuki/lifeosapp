@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { getData, initializeData } from '../utils/localStorage';
@@ -7,16 +7,9 @@ import { Globe, BookOpen, Target, Trophy } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const PublicProfile = () => {
-  const [goals, setGoals] = useState([]);
-  const [habits, setHabits] = useState([]);
-  const [japanese, setJapanese] = useState(null);
-
-  useEffect(() => {
-    initializeData(allMockData);
-    setGoals(getData('goals', []));
-    setHabits(getData('habits', []));
-    setJapanese(getData('japanese', null));
-  }, []);
+  const [goals] = useState(() => { initializeData(allMockData); return getData('goals', []); });
+  const [habits] = useState(() => getData('habits', []));
+  const [japanese] = useState(() => getData('japanese', null));
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -37,13 +30,16 @@ const PublicProfile = () => {
           { label: 'Habits', value: habits.length, icon: Target, color: 'text-primary' },
           { label: 'Goals', value: goals.length, icon: Trophy, color: 'text-secondary' },
           { label: 'Japanese', value: japanese?.currentLevel || 'N3', icon: BookOpen, color: 'text-accent' },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <Card key={label} className="text-center">
-            <Icon size={24} className={`${color} mx-auto mb-2`} />
-            <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
-            <p className="text-xs text-gray-400">{label}</p>
-          </Card>
-        ))}
+        ].map(({ label, value, icon, color }) => {
+          const Icon = icon;
+          return (
+            <Card key={label} className="text-center">
+              <Icon size={24} className={`${color} mx-auto mb-2`} />
+              <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
+              <p className="text-xs text-gray-400">{label}</p>
+            </Card>
+          );
+        })}
       </div>
 
       <Card>
@@ -58,7 +54,7 @@ const PublicProfile = () => {
                   <span className="text-gray-400">{pct}%</span>
                 </div>
                 <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{width: `${pct}%`}} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             );

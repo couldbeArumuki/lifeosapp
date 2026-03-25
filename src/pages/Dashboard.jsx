@@ -1,41 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { getData, initializeData } from '../utils/localStorage';
 import { allMockData, mockWeeklyData } from '../data/mockData';
+import { useNavigate } from 'react-router-dom';
 
-const StatCard = ({ icon: Icon, label, value, sub, color, bg }) => (
-  <Card className={`${bg} border-0`}>
-    <div className="flex items-start justify-between">
-      <div>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
-        <p className={`text-3xl font-bold font-mono mt-1 ${color}`}>{value}</p>
-        {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+const StatCard = ({ icon, label, value, sub, color, bg }) => {
+  const Icon = icon;
+  return (
+    <Card className={`${bg} border-0`}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className={`text-3xl font-bold font-mono mt-1 ${color}`}>{value}</p>
+          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+        </div>
+        <div className={`p-3 rounded-xl ${color} bg-white/50 dark:bg-white/10`}>
+          <Icon size={20} />
+        </div>
       </div>
-      <div className={`p-3 rounded-xl ${color} bg-white/50 dark:bg-white/10`}>
-        <Icon size={20} />
-      </div>
-    </div>
-  </Card>
-);
+    </Card>
+  );
+};
 
 const Dashboard = () => {
-  const [tasks, setTasks] = useState([]);
-  const [habits, setHabits] = useState([]);
-  const [studyLog, setStudyLog] = useState([]);
-  const [moodLog, setMoodLog] = useState([]);
-  const [sleepLog, setSleepLog] = useState([]);
-
-  useEffect(() => {
-    initializeData(allMockData);
-    setTasks(getData('tasks', []));
-    setHabits(getData('habits', []));
-    setStudyLog(getData('studyLog', []));
-    setMoodLog(getData('moodLog', []));
-    setSleepLog(getData('sleepLog', []));
-  }, []);
+  const navigate = useNavigate();
+  const [tasks] = useState(() => { initializeData(allMockData); return getData('tasks', []); });
+  const [habits] = useState(() => getData('habits', []));
+  const [studyLog] = useState(() => getData('studyLog', []));
+  const [moodLog] = useState(() => getData('moodLog', []));
+  const [sleepLog] = useState(() => getData('sleepLog', []));
 
   const today = new Date().toISOString().split('T')[0];
   const todayTasks = tasks.filter(t => t.dueDate === today);
@@ -63,7 +59,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard icon={CheckSquare} label="Tasks Today" value={`${completedToday}/${todayTasks.length}`} sub="completed" color="text-primary" bg="bg-primary/5 dark:bg-primary/10" />
         <StatCard icon={Target} label="Habits" value={`${habitsCompletedToday}/${habits.length}`} sub="done today" color="text-secondary" bg="bg-secondary/5 dark:bg-secondary/10" />
-        <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy/60*10)/10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" />
+        <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" />
         <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" />
         <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" />
       </div>
@@ -100,8 +96,8 @@ const Dashboard = () => {
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="tasks" fill="#B19CD9" radius={[4,4,0,0]} />
-              <Bar dataKey="mood" fill="#7EC8A3" radius={[4,4,0,0]} />
+              <Bar dataKey="tasks" fill="#B19CD9" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="mood" fill="#7EC8A3" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -112,21 +108,25 @@ const Dashboard = () => {
           <h3 className="font-heading font-semibold text-text-dark dark:text-text-light mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Add Task', icon: CheckSquare, color: 'primary' },
-              { label: 'Log Mood', icon: Smile, color: 'secondary' },
-              { label: 'Study Session', icon: BookOpen, color: 'tertiary' },
-              { label: 'Log Sleep', icon: Moon, color: 'ghost' },
-            ].map(({ label, icon: Icon, color }) => (
-              <Button key={label} variant={color} className="justify-center py-3 text-xs">
-                <Icon size={16} /> {label}
-              </Button>
-            ))}
+              { label: 'Add Task', icon: CheckSquare, color: 'primary', path: '/tasks' },
+              { label: 'Log Mood', icon: Smile, color: 'secondary', path: '/trackers' },
+              { label: 'Study Session', icon: BookOpen, color: 'tertiary', path: '/study-log' },
+              { label: 'Log Sleep', icon: Moon, color: 'ghost', path: '/trackers' },
+            ].map(({ label, icon, color, path }) => {
+              const Icon = icon;
+              return (
+                <Button key={label} variant={color} onClick={() => navigate(path)} className="justify-center py-3 text-xs">
+                  <Icon size={16} /> {label}
+                </Button>
+              );
+            })}
           </div>
         </Card>
 
         <Card>
           <h3 className="font-heading font-semibold text-text-dark dark:text-text-light mb-4">Recent Activity</h3>
           <div className="space-y-3">
+            {recentActivities.length === 0 && <p className="text-sm text-gray-400">No recent activity yet.</p>}
             {recentActivities.map((activity, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-2 h-2 rounded-full mt-2 bg-primary flex-shrink-0" />

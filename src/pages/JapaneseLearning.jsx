@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Star, BookOpen, TrendingUp } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
@@ -7,8 +7,7 @@ import { getData, initializeData } from '../utils/localStorage';
 import { allMockData } from '../data/mockData';
 
 const JapaneseLearning = () => {
-  const [data, setData] = useState(null);
-  useEffect(() => { initializeData(allMockData); setData(getData('japanese', null)); }, []);
+  const [data] = useState(() => { initializeData(allMockData); return getData('japanese', null); });
   if (!data) return null;
 
   return (

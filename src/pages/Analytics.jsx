@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Card from '../components/Card';
 import { getData, initializeData } from '../utils/localStorage';
 import { allMockData, mockWeeklyData } from '../data/mockData';
@@ -7,16 +7,9 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 const COLORS = ['#6B9BD1', '#B19CD9', '#7EC8A3', '#F4A6C1'];
 
 const Analytics = () => {
-  const [studyLog, setStudyLog] = useState([]);
-  const [moodLog, setMoodLog] = useState([]);
-  const [sleepLog, setSleepLog] = useState([]);
-
-  useEffect(() => {
-    initializeData(allMockData);
-    setStudyLog(getData('studyLog', []));
-    setMoodLog(getData('moodLog', []));
-    setSleepLog(getData('sleepLog', []));
-  }, []);
+  const [studyLog] = useState(() => { initializeData(allMockData); return getData('studyLog', []); });
+  const [moodLog] = useState(() => getData('moodLog', []));
+  const [sleepLog] = useState(() => getData('sleepLog', []));
 
   const subjectData = studyLog.reduce((acc, s) => {
     const found = acc.find(a => a.name === s.subject);
@@ -71,7 +64,7 @@ const Analytics = () => {
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} domain={[0, 5]} />
               <Tooltip />
-              <Bar dataKey="intensity" fill="#7EC8A3" radius={[4,4,0,0]} />
+              <Bar dataKey="intensity" fill="#7EC8A3" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -84,8 +77,8 @@ const Analytics = () => {
               <XAxis dataKey="day" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="study" fill="#6B9BD1" radius={[4,4,0,0]} name="Study (h)" />
-              <Bar dataKey="tasks" fill="#B19CD9" radius={[4,4,0,0]} name="Tasks" />
+              <Bar dataKey="study" fill="#6B9BD1" radius={[4, 4, 0, 0]} name="Study (h)" />
+              <Bar dataKey="tasks" fill="#B19CD9" radius={[4, 4, 0, 0]} name="Tasks" />
             </BarChart>
           </ResponsiveContainer>
         </Card>
