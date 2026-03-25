@@ -24,7 +24,7 @@ function App() {
           <Route element={<DashboardLayout><Trackers /></DashboardLayout>} path="/trackers" />
           <Route element={<DashboardLayout><Goals /></DashboardLayout>} path="/goals" />
           <Route element={<DashboardLayout><Analytics /></DashboardLayout>} path="/analytics" />
-          <Route element={<DashboardLayout><PublicProfile /></DashboardLayout>} path="/public" />
+          <Route element={<PublicProfile />} path="/public" />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
