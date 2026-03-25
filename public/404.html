@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LifeOS</title>
+    <script>
+      // GitHub Pages SPA redirect
+      // Encodes the path into a query parameter so the main index.html can restore it
+      // Encodes the path into a query parameter so the main index.html can restore it.
+      // Extracts the first 2 path segments (protocol + subdirectory), then appends the
+      // remaining path with '&' characters escaped as '~and~'.
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 2).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(1).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

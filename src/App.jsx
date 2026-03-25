@@ -14,7 +14,7 @@ import PublicProfile from './pages/PublicProfile';
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/lifeosapp">
         <Routes>
           <Route element={<DashboardLayout><Dashboard /></DashboardLayout>} path="/" />
           <Route element={<DashboardLayout><Tasks /></DashboardLayout>} path="/tasks" />
