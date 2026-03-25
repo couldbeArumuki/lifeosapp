@@ -46,12 +46,13 @@ const Tasks = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
+    const completed = form.status === 'completed';
     if (editTask !== null) {
-      const updated = tasks.map(t => t.id === editTask ? { ...form, id: editTask } : t);
+      const updated = tasks.map(t => t.id === editTask ? { ...form, id: editTask, completed } : t);
       persist(updated);
       addToast('Task updated!', 'success');
     } else {
-      const newTask = { ...form, id: Date.now(), completed: form.status === 'completed' };
+      const newTask = { ...form, id: Date.now(), completed };
       persist([...tasks, newTask]);
       addToast('Task added!', 'success');
     }

@@ -41,11 +41,12 @@ const Habits = () => {
   };
 
   const calcStreak = (dates) => {
+    const dateSet = new Set(dates);
     let count = 0;
     const d = new Date();
-    while (true) {
+    while (count <= dateSet.size) {
       const ds = d.toISOString().split('T')[0];
-      if (dates.includes(ds)) {
+      if (dateSet.has(ds)) {
         count++;
         d.setDate(d.getDate() - 1);
       } else break;
