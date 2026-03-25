@@ -35,3 +35,24 @@ export const initializeData = (mockData) => {
     }
   });
 };
+
+// Compute last-7-days chart data from real localStorage entries
+export const computeWeeklyData = (studyLog = [], tasks = [], moodLog = []) => {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - 6 + i);
+    const date = d.toISOString().split('T')[0];
+    const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+    const studyMinutes = studyLog
+      .filter(s => s.date === date)
+      .reduce((sum, s) => sum + s.duration, 0);
+    const taskCount = tasks.filter(t => t.completed === true && t.dueDate === date).length;
+    const moodEntry = moodLog.find(m => m.date === date);
+    return {
+      day,
+      study: Math.round(studyMinutes / 60 * 10) / 10,
+      tasks: taskCount,
+      mood: moodEntry?.intensity ?? 0,
+    };
+  });
+};

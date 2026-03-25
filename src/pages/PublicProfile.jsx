@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
-import { getData, initializeData } from '../utils/localStorage';
-import { allMockData, mockWeeklyData } from '../data/mockData';
+import { getData } from '../utils/localStorage';
+import { computeWeeklyData } from '../utils/localStorage';
 import { Globe, BookOpen, Target, Trophy } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const PublicProfile = () => {
-  const [goals] = useState(() => { initializeData(allMockData); return getData('goals', []); });
+  const [goals] = useState(() => getData('goals', []));
   const [habits] = useState(() => getData('habits', []));
   const [japanese] = useState(() => getData('japanese', null));
+  const [studyLog] = useState(() => getData('studyLog', []));
+  const weeklyData = computeWeeklyData(studyLog, [], []);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -65,7 +67,7 @@ const PublicProfile = () => {
       <Card>
         <h3 className="font-heading font-semibold mb-4 text-text-dark dark:text-text-light">📊 Weekly Activity</h3>
         <ResponsiveContainer width="100%" height={160}>
-          <AreaChart data={mockWeeklyData}>
+          <AreaChart data={weeklyData}>
             <defs>
               <linearGradient id="pubGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#6B9BD1" stopOpacity={0.3} />

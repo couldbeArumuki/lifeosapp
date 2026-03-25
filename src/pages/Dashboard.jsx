@@ -3,8 +3,8 @@ import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity } from
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { getData, initializeData } from '../utils/localStorage';
-import { allMockData, mockWeeklyData } from '../data/mockData';
+import { getData } from '../utils/localStorage';
+import { computeWeeklyData } from '../utils/localStorage';
 import { useNavigate } from 'react-router-dom';
 
 const StatCard = ({ icon, label, value, sub, color, bg }) => {
@@ -27,11 +27,13 @@ const StatCard = ({ icon, label, value, sub, color, bg }) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [tasks] = useState(() => { initializeData(allMockData); return getData('tasks', []); });
+  const [tasks] = useState(() => getData('tasks', []));
   const [habits] = useState(() => getData('habits', []));
   const [studyLog] = useState(() => getData('studyLog', []));
   const [moodLog] = useState(() => getData('moodLog', []));
   const [sleepLog] = useState(() => getData('sleepLog', []));
+
+  const weeklyData = computeWeeklyData(studyLog, tasks, moodLog);
 
   const today = new Date().toISOString().split('T')[0];
   const todayTasks = tasks.filter(t => t.dueDate === today);
@@ -70,7 +72,7 @@ const Dashboard = () => {
             <TrendingUp size={18} className="text-primary" /> Weekly Study Hours
           </h3>
           <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={mockWeeklyData}>
+            <AreaChart data={weeklyData}>
               <defs>
                 <linearGradient id="studyGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#6B9BD1" stopOpacity={0.3} />
@@ -91,7 +93,7 @@ const Dashboard = () => {
             <Activity size={18} className="text-secondary" /> Weekly Tasks &amp; Mood
           </h3>
           <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={mockWeeklyData}>
+            <BarChart data={weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />

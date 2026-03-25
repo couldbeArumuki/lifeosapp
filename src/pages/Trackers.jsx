@@ -7,8 +7,7 @@ import Modal from '../components/Modal';
 import Input from '../components/Input';
 import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
-import { getData, saveData, initializeData } from '../utils/localStorage';
-import { allMockData } from '../data/mockData';
+import { getData, saveData } from '../utils/localStorage';
 
 const moodColors = { happy: 'green', focused: 'blue', tired: 'gray', motivated: 'purple', calm: 'green', anxious: 'red' };
 
@@ -34,7 +33,6 @@ const calcSleepDuration = (bedtime, wakeTime) => {
 
 const Trackers = () => {
   const [moodLog, setMoodLog] = useState(() => {
-    initializeData(allMockData);
     return getData('moodLog', []);
   });
   const [sleepLog, setSleepLog] = useState(() => getData('sleepLog', []));

@@ -7,14 +7,12 @@ import Modal from '../components/Modal';
 import Input from '../components/Input';
 import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
-import { getData, saveData, initializeData } from '../utils/localStorage';
-import { allMockData } from '../data/mockData';
+import { getData, saveData } from '../utils/localStorage';
 
 const HABIT_COLORS = ['#6B9BD1', '#B19CD9', '#7EC8A3', '#F4A6C1', '#F4A261', '#E76F51', '#2A9D8F'];
 
 const Habits = () => {
   const [habits, setHabits] = useState(() => {
-    initializeData(allMockData);
     return getData('habits', []);
   });
   const [showModal, setShowModal] = useState(false);

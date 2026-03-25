@@ -7,8 +7,7 @@ import Modal from '../components/Modal';
 import Input from '../components/Input';
 import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
-import { getData, saveData, initializeData } from '../utils/localStorage';
-import { allMockData } from '../data/mockData';
+import { getData, saveData } from '../utils/localStorage';
 
 const priorityColor = { high: 'red', medium: 'yellow', low: 'green' };
 const statusColor = { completed: 'green', 'in-progress': 'blue', todo: 'gray' };
@@ -18,7 +17,6 @@ const defaultForm = { title: '', priority: 'medium', status: 'todo', dueDate: ''
 
 const Tasks = () => {
   const [tasks, setTasks] = useState(() => {
-    initializeData(allMockData);
     return getData('tasks', []);
   });
   const [filter, setFilter] = useState('all');
