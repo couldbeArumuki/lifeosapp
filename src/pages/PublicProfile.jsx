@@ -1,17 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { getData } from '../utils/localStorage';
-import { Globe, BookOpen, Target, Trophy, Sun, Moon, ChevronLeft, ChevronRight, Music2 } from 'lucide-react';
+import { Globe, BookOpen, Target, Trophy, Sun, Moon, Music2 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
-const MJ_PLAYLIST = [
-  { id: '5T7ywazdGIydr6JCW6t02j', title: "Don't Stop 'Til You Get Enough" },
-  { id: '0wQy2OO7jKjm0OOmA7gv3f', title: 'Beat It' },
-  { id: '7J1uxwnxfQLu4APicE5Rnj', title: 'Smooth Criminal' },
-  { id: '4fm6uqfR9apdFcjMXnmjtf', title: 'Billie Jean' },
-  { id: '1EdzLQKCE066beJkDfaagd', title: 'Thriller' },
-];
+const MJ_ALBUM_ID = '3OBhnTLrvkoEEETjFA3Qfk';
 
 const PublicProfile = () => {
   const [goals] = useState(() => getData('goals', []));
@@ -19,9 +13,6 @@ const PublicProfile = () => {
   const [japanese] = useState(() => getData('japanese', null));
   const [studyLog] = useState(() => getData('studyLog', []));
   const { isDark, toggleTheme } = useTheme();
-
-  const [currentSong, setCurrentSong] = useState(0);
-  const iframeRef = useRef(null);
 
   const totalStudyMinutes = studyLog.reduce((sum, s) => sum + (s.duration || 0), 0);
   const studyHours = Math.floor(totalStudyMinutes / 60);
@@ -31,21 +22,6 @@ const PublicProfile = () => {
     const booksGoal = goals.find(g => g.title?.toLowerCase().includes('book'));
     return booksGoal ? booksGoal.progress : 0;
   })();
-
-  const goNext = useCallback(() => {
-    setCurrentSong(prev => (prev + 1) % MJ_PLAYLIST.length);
-  }, []);
-
-  const goPrev = useCallback(() => {
-    setCurrentSong(prev => (prev - 1 + MJ_PLAYLIST.length) % MJ_PLAYLIST.length);
-  }, []);
-
-  // Reload iframe src when song changes to trigger autoplay
-  useEffect(() => {
-    if (iframeRef.current) {
-      iframeRef.current.src = `https://open.spotify.com/embed/track/${MJ_PLAYLIST[currentSong].id}?utm_source=generator&autoplay=1`;
-    }
-  }, [currentSong]);
 
   return (
     <div className="min-h-screen bg-bg-light dark:bg-bg-dark">
@@ -161,57 +137,17 @@ const PublicProfile = () => {
             <h2 className="font-heading font-semibold text-text-dark dark:text-text-light">🎵 NOW PLAYING</h2>
           </div>
 
-          <div className="flex items-center justify-between mb-3">
-            <button
-              onClick={goPrev}
-              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-500 dark:text-gray-400"
-              aria-label="Previous song"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <div className="text-center">
-              <p className="text-xs font-medium text-text-dark dark:text-text-light truncate max-w-[180px]">
-                {MJ_PLAYLIST[currentSong].title}
-              </p>
-              <p className="text-xs text-gray-400">Michael Jackson • {currentSong + 1}/{MJ_PLAYLIST.length}</p>
-            </div>
-            <button
-              onClick={goNext}
-              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-500 dark:text-gray-400"
-              aria-label="Next song"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-
           <iframe
-            ref={iframeRef}
             data-testid="embed-iframe"
             style={{ borderRadius: '12px', border: 0 }}
-            src={`https://open.spotify.com/embed/track/${MJ_PLAYLIST[currentSong].id}?utm_source=generator&autoplay=1`}
+            src={`https://open.spotify.com/embed/album/${MJ_ALBUM_ID}?utm_source=generator`}
             width="100%"
-            height="152"
+            height="352"
             allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
-            title={`Spotify: ${MJ_PLAYLIST[currentSong].title}`}
+            title="Michael Jackson Album"
           />
-
-          {/* Playlist dots */}
-          <div className="flex items-center justify-center gap-1.5 mt-3">
-            {MJ_PLAYLIST.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentSong(i)}
-                aria-label={`Play ${MJ_PLAYLIST[i].title}`}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  i === currentSong
-                    ? 'bg-primary scale-125'
-                    : 'bg-gray-300 dark:bg-white/20 hover:bg-gray-400 dark:hover:bg-white/40'
-                }`}
-              />
-            ))}
-          </div>
         </Card>
 
         <p className="text-center text-xs text-gray-400 pb-4">📖 Read-only public profile • Powered by LifeOS</p>
