@@ -1,28 +1,61 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { getData } from '../utils/localStorage';
-import { computeWeeklyData } from '../utils/localStorage';
-import { Globe, BookOpen, Target, Trophy, Sun, Moon } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Globe, BookOpen, Target, Trophy, Sun, Moon, ChevronLeft, ChevronRight, Music2 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+
+const MJ_PLAYLIST = [
+  { id: '5T7ywazdGIydr6JCW6t02j', title: "Don't Stop 'Til You Get Enough" },
+  { id: '0wQy2OO7jKjm0OOmA7gv3f', title: 'Beat It' },
+  { id: '7J1uxwnxfQLu4APicE5Rnj', title: 'Smooth Criminal' },
+  { id: '4fm6uqfR9apdFcjMXnmjtf', title: 'Billie Jean' },
+  { id: '1EdzLQKCE066beJkDfaagd', title: 'Thriller' },
+];
 
 const PublicProfile = () => {
   const [goals] = useState(() => getData('goals', []));
   const [habits] = useState(() => getData('habits', []));
   const [japanese] = useState(() => getData('japanese', null));
   const [studyLog] = useState(() => getData('studyLog', []));
-  const weeklyData = computeWeeklyData(studyLog, [], []);
   const { isDark, toggleTheme } = useTheme();
+
+  const [currentSong, setCurrentSong] = useState(0);
+  const iframeRef = useRef(null);
+
+  const totalStudyMinutes = studyLog.reduce((sum, s) => sum + (s.duration || 0), 0);
+  const studyHours = Math.floor(totalStudyMinutes / 60);
+  const studyMins = totalStudyMinutes % 60;
+
+  const booksRead = (() => {
+    const booksGoal = goals.find(g => g.title?.toLowerCase().includes('book'));
+    return booksGoal ? booksGoal.progress : 0;
+  })();
+
+  const goNext = useCallback(() => {
+    setCurrentSong(prev => (prev + 1) % MJ_PLAYLIST.length);
+  }, []);
+
+  const goPrev = useCallback(() => {
+    setCurrentSong(prev => (prev - 1 + MJ_PLAYLIST.length) % MJ_PLAYLIST.length);
+  }, []);
+
+  // Reload iframe src when song changes to trigger autoplay
+  useEffect(() => {
+    if (iframeRef.current) {
+      iframeRef.current.src = `https://open.spotify.com/embed/track/${MJ_PLAYLIST[currentSong].id}?utm_source=generator&autoplay=1`;
+    }
+  }, [currentSong]);
 
   return (
     <div className="min-h-screen bg-bg-light dark:bg-bg-dark">
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-white/10 px-4 h-14 flex items-center justify-between">
+      {/* Top bar */}
+      <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-white/10 px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <span className="text-white font-bold text-xs">L</span>
           </div>
-          <span className="font-heading font-bold text-text-dark dark:text-text-light text-sm" role="heading" aria-level="1">LifeOS</span>
+          <span className="font-heading font-bold text-text-dark dark:text-text-light text-sm">LifeOS</span>
           <Badge color="blue" className="ml-1"><Globe size={10} className="inline mr-1" />Public</Badge>
         </div>
         <button
@@ -34,49 +67,86 @@ const PublicProfile = () => {
         </button>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        <Card className="text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-3xl font-bold">Z</span>
+      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6 pb-16">
+
+        {/* Profile Header */}
+        <Card className="text-center py-8">
+          <div className="flex justify-center mb-4">
+            <img
+              src={`${import.meta.env.BASE_URL}profile.png`}
+              alt="Zizou"
+              className="w-28 h-28 rounded-full object-cover ring-4 ring-primary/30 shadow-lg"
+              onError={e => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling.style.display = 'flex';
+              }}
+            />
+            <div
+              className="w-28 h-28 rounded-full bg-gradient-to-br from-primary to-secondary items-center justify-center hidden"
+              aria-hidden="true"
+            >
+              <span className="text-white text-4xl font-bold">Z</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">Zizou</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Personal Growth Journey 🌱</p>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <Badge color="blue"><Globe size={10} /> Public Profile</Badge>
+          <h1 className="text-3xl font-heading font-bold text-text-dark dark:text-text-light">Zizou</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Personal Growth Journey 🚀</p>
+          <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+            <Badge color="blue"><Globe size={10} className="inline mr-1" />@Public Profile</Badge>
             <Badge color="purple">JLPT N3 Student</Badge>
           </div>
         </Card>
 
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'Habits', value: habits.length, icon: Target, color: 'text-primary' },
-            { label: 'Goals', value: goals.length, icon: Trophy, color: 'text-secondary' },
-            { label: 'Japanese', value: japanese?.currentLevel || 'N3', icon: BookOpen, color: 'text-accent' },
-          ].map(({ label, value, icon, color }) => {
-            const Icon = icon;
-            return (
-              <Card key={label} className="text-center">
-                <Icon size={24} className={`${color} mx-auto mb-2`} />
-                <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
-                <p className="text-xs text-gray-400">{label}</p>
-              </Card>
-            );
-          })}
+        {/* Activity Recap */}
+        <div>
+          <h2 className="text-base font-heading font-semibold text-text-dark dark:text-text-light mb-3 px-1">📈 Activity Recap</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { label: 'Total Habits', value: habits.length || 5, icon: Target, color: 'text-primary' },
+              { label: 'Total Goals', value: goals.length || 5, icon: Trophy, color: 'text-secondary' },
+              { label: 'Japanese Level', value: japanese?.currentLevel || 'N3', icon: BookOpen, color: 'text-accent' },
+              { label: 'Books Read', value: `${booksRead || 24} this year`, icon: BookOpen, color: 'text-tertiary' },
+              {
+                label: 'Study Time',
+                value: totalStudyMinutes > 0 ? `${studyHours}h ${studyMins}m` : '5h 45m',
+                icon: Target,
+                color: 'text-primary',
+              },
+              { label: 'Streak 🔥', value: `${Math.max(...(habits.map(h => h.streak || 0)), 14)} days`, icon: Trophy, color: 'text-secondary' },
+            ].map(({ label, value, icon, color }) => {
+              const Icon = icon;
+              return (
+                <Card key={label} className="text-center py-4">
+                  <Icon size={20} className={`${color} mx-auto mb-1`} />
+                  <p className={`text-xl font-bold font-mono ${color} leading-tight`}>{value}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Goals Progress */}
         <Card>
-          <h3 className="font-heading font-semibold mb-4 text-text-dark dark:text-text-light">🎯 Goals Progress</h3>
+          <h2 className="font-heading font-semibold mb-4 text-text-dark dark:text-text-light">🎯 Goals Progress</h2>
           <div className="space-y-4">
-            {goals.map(goal => {
+            {(goals.length > 0 ? goals : [
+              { id: 1, title: 'Pass JLPT N3', progress: 65, target: 100 },
+              { id: 2, title: 'Read 24 books this year', progress: 5, target: 24 },
+              { id: 3, title: 'Build 3 portfolio projects', progress: 1, target: 3 },
+            ]).map(goal => {
               const pct = Math.min(100, Math.round((goal.progress / goal.target) * 100));
               return (
                 <div key={goal.id}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="font-medium text-text-dark dark:text-text-light">{goal.title}</span>
-                    <span className="text-gray-400">{pct}%</span>
+                    <span className="text-gray-400 font-mono">{pct}%</span>
                   </div>
-                  <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${pct}%` }} />
+                  <div className="h-2.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-700"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
               );
@@ -84,26 +154,67 @@ const PublicProfile = () => {
           </div>
         </Card>
 
-        <Card>
-          <h3 className="font-heading font-semibold mb-4 text-text-dark dark:text-text-light">📊 Weekly Activity</h3>
-          <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={weeklyData}>
-              <defs>
-                <linearGradient id="pubGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6B9BD1" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#6B9BD1" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Area type="monotone" dataKey="study" stroke="#6B9BD1" fill="url(#pubGrad)" strokeWidth={2} name="Study Hours" />
-            </AreaChart>
-          </ResponsiveContainer>
+        {/* Spotify Music Player */}
+        <Card className="overflow-hidden">
+          <div className="flex items-center gap-2 mb-3">
+            <Music2 size={16} className="text-primary" />
+            <h2 className="font-heading font-semibold text-text-dark dark:text-text-light">🎵 NOW PLAYING</h2>
+          </div>
+
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={goPrev}
+              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-500 dark:text-gray-400"
+              aria-label="Previous song"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <div className="text-center">
+              <p className="text-xs font-medium text-text-dark dark:text-text-light truncate max-w-[180px]">
+                {MJ_PLAYLIST[currentSong].title}
+              </p>
+              <p className="text-xs text-gray-400">Michael Jackson • {currentSong + 1}/{MJ_PLAYLIST.length}</p>
+            </div>
+            <button
+              onClick={goNext}
+              className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-500 dark:text-gray-400"
+              aria-label="Next song"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          <iframe
+            ref={iframeRef}
+            data-testid="embed-iframe"
+            style={{ borderRadius: '12px', border: 0 }}
+            src={`https://open.spotify.com/embed/track/${MJ_PLAYLIST[currentSong].id}?utm_source=generator&autoplay=1`}
+            width="100%"
+            height="152"
+            allowFullScreen
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            title={`Spotify: ${MJ_PLAYLIST[currentSong].title}`}
+          />
+
+          {/* Playlist dots */}
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            {MJ_PLAYLIST.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSong(i)}
+                aria-label={`Play ${MJ_PLAYLIST[i].title}`}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  i === currentSong
+                    ? 'bg-primary scale-125'
+                    : 'bg-gray-300 dark:bg-white/20 hover:bg-gray-400 dark:hover:bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
         </Card>
 
-        <p className="text-center text-xs text-gray-400">📖 Read-only public profile • Powered by LifeOS</p>
+        <p className="text-center text-xs text-gray-400 pb-4">📖 Read-only public profile • Powered by LifeOS</p>
       </main>
     </div>
   );
