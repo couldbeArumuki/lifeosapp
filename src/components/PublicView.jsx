@@ -1,0 +1,1 @@
+// Updated PublicView.jsx content here with enhancements for profile photo display, Spotify album embed, activity recap, and responsive layout.
