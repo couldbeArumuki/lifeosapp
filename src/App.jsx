@@ -9,6 +9,7 @@ import StudyLog from './pages/StudyLog';
 import Trackers from './pages/Trackers';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
+import TodoList from './pages/TodoList';
 import PublicProfile from './pages/PublicProfile';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route element={<DashboardLayout><Trackers /></DashboardLayout>} path="/trackers" />
           <Route element={<DashboardLayout><Goals /></DashboardLayout>} path="/goals" />
           <Route element={<DashboardLayout><Analytics /></DashboardLayout>} path="/analytics" />
+          <Route element={<DashboardLayout><TodoList /></DashboardLayout>} path="/todo" />
           <Route element={<PublicProfile />} path="/public" />
         </Routes>
       </BrowserRouter>
