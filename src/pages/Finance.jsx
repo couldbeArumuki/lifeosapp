@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 import Input from '../components/Input';
 import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
-import { getData, saveData } from '../utils/localStorage';
+import { getData, saveData, formatIDR } from '../utils/localStorage';
 
 const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
 const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Health', 'Entertainment', 'Shopping', 'Bills', 'Education', 'Other'];
@@ -17,8 +17,6 @@ const categoryColor = {
   Food: 'yellow', Transport: 'blue', Health: 'green', Entertainment: 'purple',
   Shopping: 'pink', Bills: 'red', Education: 'blue',
 };
-
-const fmt = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
 const defaultForm = { amount: '', category: '', description: '', date: new Date().toISOString().split('T')[0] };
 
@@ -88,7 +86,7 @@ const Finance = () => {
         <div>
           <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">Finance</h1>
           <p className={`text-sm mt-1 font-medium ${netBalance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            Net this month: {fmt(netBalance)}
+            Net this month: {formatIDR(netBalance)}
           </p>
         </div>
         <Button variant="primary" onClick={openModal}><Plus size={16} /> Add {tab === 'income' ? 'Income' : 'Expense'}</Button>
@@ -99,7 +97,7 @@ const Finance = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Income</p>
-              <p className="text-lg font-bold font-mono text-green-600 mt-1">{fmt(monthIncome)}</p>
+              <p className="text-lg font-bold font-mono text-green-600 mt-1">{formatIDR(monthIncome)}</p>
               <p className="text-xs text-gray-400">this month</p>
             </div>
             <div className="p-2 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-600">
@@ -111,7 +109,7 @@ const Finance = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Expenses</p>
-              <p className="text-lg font-bold font-mono text-red-500 mt-1">{fmt(monthExpense)}</p>
+              <p className="text-lg font-bold font-mono text-red-500 mt-1">{formatIDR(monthExpense)}</p>
               <p className="text-xs text-gray-400">this month</p>
             </div>
             <div className="p-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-500">
@@ -123,7 +121,7 @@ const Finance = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Balance</p>
-              <p className={`text-lg font-bold font-mono mt-1 ${netBalance >= 0 ? 'text-primary' : 'text-orange-500'}`}>{fmt(netBalance)}</p>
+              <p className={`text-lg font-bold font-mono mt-1 ${netBalance >= 0 ? 'text-primary' : 'text-orange-500'}`}>{formatIDR(netBalance)}</p>
               <p className="text-xs text-gray-400">net balance</p>
             </div>
             <div className={`p-2 rounded-xl ${netBalance >= 0 ? 'bg-blue-100 dark:bg-blue-900/30 text-primary' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-500'}`}>
@@ -153,7 +151,7 @@ const Finance = () => {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono font-bold text-text-dark dark:text-text-light">{fmt(entry.amount)}</span>
+                <span className="font-mono font-bold text-text-dark dark:text-text-light">{formatIDR(entry.amount)}</span>
                 <Badge color={categoryColor[entry.category] || 'gray'}>{entry.category}</Badge>
               </div>
               {entry.description && <p className="text-xs text-gray-400 mt-0.5">{entry.description}</p>}

@@ -3,8 +3,7 @@ import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity, Walle
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { getData } from '../utils/localStorage';
-import { computeWeeklyData } from '../utils/localStorage';
+import { getData, computeWeeklyData, formatIDR } from '../utils/localStorage';
 import { useNavigate } from 'react-router-dom';
 
 const StatCard = ({ icon, label, value, sub, color, bg, style }) => {
@@ -49,7 +48,6 @@ const Dashboard = () => {
   const monthIncome = financeIncome.filter(e => e.date.startsWith(thisMonth)).reduce((s, e) => s + e.amount, 0);
   const monthExpense = financeExpense.filter(e => e.date.startsWith(thisMonth)).reduce((s, e) => s + e.amount, 0);
   const netBalance = monthIncome - monthExpense;
-  const fmtIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0, notation: 'compact' }).format(n);
 
   const recentActivities = [
     ...studyLog.slice(0, 2).map(s => ({ type: 'study', text: `Studied ${s.subject} for ${s.duration} min`, time: s.date })),
@@ -72,7 +70,7 @@ const Dashboard = () => {
         <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" style={{ animationDelay: '120ms' }} />
         <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" style={{ animationDelay: '180ms' }} />
         <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" style={{ animationDelay: '240ms' }} />
-        <StatCard icon={Wallet} label="Finance" value={fmtIDR(netBalance)} sub={netBalance >= 0 ? 'net positive' : 'net negative'} color={netBalance >= 0 ? 'text-green-600' : 'text-red-500'} bg={netBalance >= 0 ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10'} style={{ animationDelay: '300ms' }} />
+        <StatCard icon={Wallet} label="Finance" value={formatIDR(netBalance)} sub={netBalance >= 0 ? 'net positive' : 'net negative'} color={netBalance >= 0 ? 'text-green-600' : 'text-red-500'} bg={netBalance >= 0 ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10'} style={{ animationDelay: '300ms' }} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

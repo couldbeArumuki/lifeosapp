@@ -22,6 +22,7 @@ const MOODS = [
 
 const EXERCISE_TYPES = ['Running', 'Cycling', 'Swimming', 'Gym', 'Yoga', 'Walking', 'Other'];
 const WATER_GOAL = 8;
+const WATER_MAX_GLASSES = 20;
 
 const defaultMoodForm = { mood: 'happy', intensity: 3, notes: '', date: new Date().toISOString().split('T')[0] };
 const defaultSleepForm = { bedtime: '23:00', wakeTime: '07:00', quality: 4, notes: '', date: new Date().toISOString().split('T')[0] };
@@ -93,7 +94,7 @@ const Trackers = () => {
   };
 
   const adjustWater = (delta) => {
-    const newGlasses = Math.max(0, Math.min(20, todayGlasses + delta));
+    const newGlasses = Math.max(0, Math.min(WATER_MAX_GLASSES, todayGlasses + delta));
     if (todayWater) {
       const updated = waterLog.map(w => w.date === today ? { ...w, glasses: newGlasses } : w);
       persistWater(updated);
@@ -123,10 +124,9 @@ const Trackers = () => {
   };
 
   const handleDelete = () => {
-    const deleteTab = tab;
-    if (deleteTab === 'mood') persistMood(moodLog.filter(e => e.id !== deleteConfirm));
-    else if (deleteTab === 'sleep') persistSleep(sleepLog.filter(e => e.id !== deleteConfirm));
-    else if (deleteTab === 'exercise') persistExercise(exerciseLog.filter(e => e.id !== deleteConfirm));
+    if (tab === 'mood') persistMood(moodLog.filter(e => e.id !== deleteConfirm));
+    else if (tab === 'sleep') persistSleep(sleepLog.filter(e => e.id !== deleteConfirm));
+    else if (tab === 'exercise') persistExercise(exerciseLog.filter(e => e.id !== deleteConfirm));
     setDeleteConfirm(null);
     addToast('Entry deleted.', 'info');
   };

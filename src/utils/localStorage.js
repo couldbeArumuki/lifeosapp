@@ -1,5 +1,8 @@
 const PREFIX = 'lifeos-';
 
+export const formatIDR = (n) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+
 export const saveData = (key, data) => {
   try {
     localStorage.setItem(PREFIX + key, JSON.stringify(data));
