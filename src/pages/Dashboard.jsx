@@ -7,20 +7,25 @@ import { getData } from '../utils/localStorage';
 import { computeWeeklyData } from '../utils/localStorage';
 import { useNavigate } from 'react-router-dom';
 
-const StatCard = ({ icon, label, value, sub, color, bg }) => {
+const StatCard = ({ icon, label, value, sub, color, bg, progress }) => {
   const Icon = icon;
   return (
-    <Card className={`${bg} border-0`}>
-      <div className="flex items-start justify-between">
+    <Card className={`${bg} border-0 card-hover`}>
+      <div className="flex items-start justify-between mb-3">
         <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
-          <p className={`text-3xl font-bold font-mono mt-1 ${color}`}>{value}</p>
-          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{label}</p>
+          <p className={`text-2xl font-bold font-mono mt-1 ${color}`}>{value}</p>
+          {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
         </div>
-        <div className={`p-3 rounded-xl ${color} bg-white/50 dark:bg-white/10`}>
-          <Icon size={20} />
+        <div className={`p-2.5 rounded-xl ${color} bg-white/60 dark:bg-white/10`}>
+          <Icon size={18} />
         </div>
       </div>
+      {progress !== undefined && (
+        <div className="progress-track mt-2">
+          <div className="progress-bar" style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} />
+        </div>
+      )}
     </Card>
   );
 };
@@ -64,6 +69,15 @@ const Dashboard = () => {
     ...tasks.filter(t => t.completed).slice(0, 2).map(t => ({ type: 'task', text: `Completed: ${t.title}`, time: t.dueDate })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
+  const STUDY_GOAL_MINS = 120;
+  const WATER_GOAL_CUPS = 8;
+  const SLEEP_GOAL_HOURS = 8;
+
+  const taskProgress = todayTasks.length > 0 ? (completedToday / todayTasks.length) * 100 : 0;
+  const habitProgress = habits.length > 0 ? (habitsCompletedToday / habits.length) * 100 : 0;
+  const studyProgress = Math.min(100, (todayStudy / STUDY_GOAL_MINS) * 100);
+  const waterProgress = todayHealth ? Math.min(100, (todayHealth.water / WATER_GOAL_CUPS) * 100) : 0;
+
   return (
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-start justify-between">
@@ -83,12 +97,12 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
-        <StatCard icon={CheckSquare} label="Tasks Today" value={`${completedToday}/${todayTasks.length}`} sub="completed" color="text-primary" bg="bg-primary/5 dark:bg-primary/10" />
-        <StatCard icon={Target} label="Habits" value={`${habitsCompletedToday}/${habits.length}`} sub="done today" color="text-secondary" bg="bg-secondary/5 dark:bg-secondary/10" />
-        <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" />
+        <StatCard icon={CheckSquare} label="Tasks Today" value={`${completedToday}/${todayTasks.length}`} sub="completed" color="text-primary" bg="bg-primary/5 dark:bg-primary/10" progress={taskProgress} />
+        <StatCard icon={Target} label="Habits" value={`${habitsCompletedToday}/${habits.length}`} sub="done today" color="text-secondary" bg="bg-secondary/5 dark:bg-secondary/10" progress={habitProgress} />
+        <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" progress={studyProgress} />
         <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" />
-        <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" />
-        <StatCard icon={Dumbbell} label="Exercise" value={todayHealth ? `${todayHealth.exercise}m` : '—'} sub={todayHealth ? `💧 ${todayHealth.water} cups` : 'not logged'} color="text-accent" bg="bg-green-50 dark:bg-green-900/10" />
+        <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" progress={lastSleep ? (lastSleep.duration / SLEEP_GOAL_HOURS) * 100 : undefined} />
+        <StatCard icon={Dumbbell} label="Exercise" value={todayHealth ? `${todayHealth.exercise}m` : '—'} sub={todayHealth ? `💧 ${todayHealth.water} cups` : 'not logged'} color="text-accent" bg="bg-green-50 dark:bg-green-900/10" progress={waterProgress} />
         <StatCard icon={DollarSign} label="Month Spend" value={`$${monthExpenses.toFixed(0)}`} sub="this month" color="text-orange-500" bg="bg-orange-50 dark:bg-orange-900/10" />
       </div>
 
