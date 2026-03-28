@@ -2,16 +2,36 @@ import { useState } from 'react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { getData } from '../utils/localStorage';
-import { Globe, BookOpen, Target, Trophy, Sun, Moon, Music2 } from 'lucide-react';
+import { Globe, BookOpen, Target, Trophy, Sun, Moon, Music2, Disc3, Star } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
 const MJ_ALBUM_ID = '3OBhnTLrvkoEEETjFA3Qfk';
+
+const AlbumCoverPublic = ({ url, title, artist }) => {
+  const [imgError, setImgError] = useState(false);
+  if (url && !imgError) {
+    return (
+      <img
+        src={url}
+        alt={`${title} by ${artist}`}
+        className="w-full h-full object-cover"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+      <Disc3 size={32} className="text-primary/60" />
+    </div>
+  );
+};
 
 const PublicProfile = () => {
   const [goals] = useState(() => getData('goals', []));
   const [habits] = useState(() => getData('habits', []));
   const [japanese] = useState(() => getData('japanese', null));
   const [studyLog] = useState(() => getData('studyLog', []));
+  const [albums] = useState(() => getData('musicAlbums', []));
   const { isDark, toggleTheme } = useTheme();
 
   const totalStudyMinutes = studyLog.reduce((sum, s) => sum + (s.duration || 0), 0);
@@ -129,6 +149,41 @@ const PublicProfile = () => {
             })}
           </div>
         </Card>
+
+        {/* Favorite Albums */}
+        {albums.length > 0 && (
+          <div>
+            <h2 className="text-base font-heading font-semibold text-text-dark dark:text-text-light mb-3 px-1 flex items-center gap-2">
+              <Music2 size={16} className="text-primary" />
+              🎵 My Favorite Albums
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {albums.map(album => (
+                <Card key={album.id} className="p-0 overflow-hidden card-hover">
+                  <div className="aspect-square w-full overflow-hidden bg-gray-100 dark:bg-white/5">
+                    <AlbumCoverPublic url={album.coverUrl} title={album.title} artist={album.artist} />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-semibold text-text-dark dark:text-text-light text-xs leading-tight line-clamp-2">{album.title}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{album.artist}</p>
+                    {album.description && (
+                      <p className="text-xs text-gray-400 mt-1 line-clamp-2">{album.description}</p>
+                    )}
+                    <div className="flex items-center gap-0.5 mt-1">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <Star
+                          key={i}
+                          size={10}
+                          className={i < album.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Spotify Music Player */}
         <Card className="overflow-hidden">
