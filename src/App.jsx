@@ -10,6 +10,7 @@ import Trackers from './pages/Trackers';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
 import TodoList from './pages/TodoList';
+import Music from './pages/Music';
 import PublicProfile from './pages/PublicProfile';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route element={<DashboardLayout><Goals /></DashboardLayout>} path="/goals" />
           <Route element={<DashboardLayout><Analytics /></DashboardLayout>} path="/analytics" />
           <Route element={<DashboardLayout><TodoList /></DashboardLayout>} path="/todo" />
+          <Route element={<DashboardLayout><Music /></DashboardLayout>} path="/music" />
           <Route element={<PublicProfile />} path="/public" />
         </Routes>
       </BrowserRouter>
