@@ -19,7 +19,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-        <div className={`relative w-full ${sizes[size]} flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transition-all duration-300`}>
+        <div className={`relative w-full ${sizes[size]} flex flex-col max-h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transition-all duration-300`}>
           <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/10 flex-shrink-0">
             <h3 className="text-lg font-semibold font-heading text-text-dark dark:text-text-light">{title}</h3>
             <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
