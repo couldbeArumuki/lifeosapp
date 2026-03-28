@@ -10,6 +10,9 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
   }
+  * {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer utilities {
@@ -26,22 +29,56 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   .transition-all-smooth {
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .animate-fade-in {
     animation: fadeIn 0.35s ease both;
   }
   .animate-slide-up {
-    animation: slideUp 0.35s ease both;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
   .animate-slide-in-left {
     animation: slideInLeft 0.3s ease both;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .animate-pulse-soft {
+    animation: pulseSoft 2s ease-in-out infinite;
   }
   .stagger-1 { animation-delay: 0.05s; }
   .stagger-2 { animation-delay: 0.10s; }
   .stagger-3 { animation-delay: 0.15s; }
   .stagger-4 { animation-delay: 0.20s; }
   .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.30s; }
+  .stagger-7 { animation-delay: 0.35s; }
+
+  .progress-bar {
+    height: 6px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .progress-track {
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(0,0,0,0.06);
+  }
+  .dark .progress-track {
+    background: rgba(255,255,255,0.08);
+  }
+
+  .card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+  .dark .card-hover:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
 }
 
 @keyframes fadeIn {
@@ -50,11 +87,21 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideInLeft {
   from { opacity: 0; transform: translateX(-16px); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
 }

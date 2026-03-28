@@ -84,14 +84,14 @@ const DashboardLayout = ({ children }) => {
           </button>
 
           {showThemePicker && (
-            <div className="flex gap-2 flex-wrap px-3 pb-2 animate-fade-in">
+            <div className="grid grid-cols-4 gap-2 px-3 pb-2 animate-scale-in">
               {ACCENT_THEMES.map(t => (
                 <button
                   key={t.key}
                   title={t.label}
                   onClick={() => setAccent(t.key)}
-                  style={{ background: t.primary }}
-                  className={`w-6 h-6 rounded-full transition-all duration-200 ${accentKey === t.key ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-110'}`}
+                  style={{ background: `linear-gradient(135deg, ${t.primary}, ${t.secondary})` }}
+                  className={`w-8 h-8 rounded-xl transition-all duration-200 ${accentKey === t.key ? 'ring-2 ring-offset-2 ring-gray-400 scale-110 shadow-md' : 'hover:scale-110 opacity-70 hover:opacity-100'}`}
                 />
               ))}
             </div>
