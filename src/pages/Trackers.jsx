@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Moon, Trash2 } from 'lucide-react';
+import { Plus, Moon, Trash2, Droplets, Dumbbell, DollarSign, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -20,8 +20,13 @@ const MOODS = [
   { key: 'anxious', emoji: '😰', label: 'Anxious' },
 ];
 
+const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Health', 'Entertainment', 'Bills', 'Education', 'Other'];
+const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
+
 const defaultMoodForm = { mood: 'happy', intensity: 3, notes: '', date: new Date().toISOString().split('T')[0] };
 const defaultSleepForm = { bedtime: '23:00', wakeTime: '07:00', quality: 4, notes: '', date: new Date().toISOString().split('T')[0] };
+const defaultHealthForm = { water: 8, exercise: 30, weight: '', date: new Date().toISOString().split('T')[0], notes: '' };
+const defaultFinanceForm = { type: 'expense', amount: '', category: 'Food', description: '', date: new Date().toISOString().split('T')[0] };
 
 const calcSleepDuration = (bedtime, wakeTime) => {
   const [bh, bm] = bedtime.split(':').map(Number);
@@ -31,22 +36,36 @@ const calcSleepDuration = (bedtime, wakeTime) => {
   return Math.round(mins / 60 * 10) / 10;
 };
 
+const TABS = [
+  { key: 'mood',    label: 'Mood',    emoji: '😊' },
+  { key: 'sleep',   label: 'Sleep',   emoji: '🌙' },
+  { key: 'health',  label: 'Health',  emoji: '💪' },
+  { key: 'finance', label: 'Finance', emoji: '💰' },
+];
+
 const Trackers = () => {
-  const [moodLog, setMoodLog] = useState(() => {
-    return getData('moodLog', []);
-  });
+  const [moodLog, setMoodLog] = useState(() => getData('moodLog', []));
   const [sleepLog, setSleepLog] = useState(() => getData('sleepLog', []));
+  const [healthLog, setHealthLog] = useState(() => getData('healthLog', []));
+  const [financeLog, setFinanceLog] = useState(() => getData('financeLog', []));
   const [tab, setTab] = useState('mood');
   const [showMoodModal, setShowMoodModal] = useState(false);
   const [showSleepModal, setShowSleepModal] = useState(false);
+  const [showHealthModal, setShowHealthModal] = useState(false);
+  const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [moodForm, setMoodForm] = useState(defaultMoodForm);
   const [sleepForm, setSleepForm] = useState(defaultSleepForm);
+  const [healthForm, setHealthForm] = useState(defaultHealthForm);
+  const [financeForm, setFinanceForm] = useState(defaultFinanceForm);
   const [sleepErrors, setSleepErrors] = useState({});
+  const [financeErrors, setFinanceErrors] = useState({});
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const { toasts, addToast, removeToast } = useToast();
 
   const persistMood = (updated) => { setMoodLog(updated); saveData('moodLog', updated); };
   const persistSleep = (updated) => { setSleepLog(updated); saveData('sleepLog', updated); };
+  const persistHealth = (updated) => { setHealthLog(updated); saveData('healthLog', updated); };
+  const persistFinance = (updated) => { setFinanceLog(updated); saveData('financeLog', updated); };
 
   const handleMoodSubmit = (e) => {
     e.preventDefault();
@@ -79,37 +98,102 @@ const Trackers = () => {
     setSleepErrors({});
   };
 
+  const handleHealthSubmit = (e) => {
+    e.preventDefault();
+    const entry = {
+      id: Date.now(),
+      date: healthForm.date,
+      water: Number(healthForm.water),
+      exercise: Number(healthForm.exercise),
+      weight: healthForm.weight ? Number(healthForm.weight) : null,
+      notes: healthForm.notes.trim(),
+    };
+    persistHealth([entry, ...healthLog]);
+    addToast('Health logged!', 'success');
+    setShowHealthModal(false);
+    setHealthForm(defaultHealthForm);
+  };
+
+  const validateFinance = () => {
+    const e = {};
+    if (!financeForm.amount || isNaN(Number(financeForm.amount)) || Number(financeForm.amount) <= 0) e.amount = 'Enter a valid amount';
+    if (!financeForm.date) e.date = 'Date is required';
+    setFinanceErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleFinanceSubmit = (e) => {
+    e.preventDefault();
+    if (!validateFinance()) return;
+    const entry = {
+      id: Date.now(),
+      type: financeForm.type,
+      amount: Math.round(Number(financeForm.amount) * 100) / 100,
+      category: financeForm.category,
+      description: financeForm.description.trim(),
+      date: financeForm.date,
+    };
+    persistFinance([entry, ...financeLog]);
+    addToast(`${financeForm.type === 'income' ? 'Income' : 'Expense'} logged!`, 'success');
+    setShowFinanceModal(false);
+    setFinanceForm(defaultFinanceForm);
+    setFinanceErrors({});
+  };
+
   const handleDelete = () => {
     if (tab === 'mood') persistMood(moodLog.filter(e => e.id !== deleteConfirm));
-    else persistSleep(sleepLog.filter(e => e.id !== deleteConfirm));
+    else if (tab === 'sleep') persistSleep(sleepLog.filter(e => e.id !== deleteConfirm));
+    else if (tab === 'health') persistHealth(healthLog.filter(e => e.id !== deleteConfirm));
+    else persistFinance(financeLog.filter(e => e.id !== deleteConfirm));
     setDeleteConfirm(null);
     addToast('Entry deleted.', 'info');
   };
 
   const setMoodField = (key, val) => setMoodForm(f => ({ ...f, [key]: val }));
   const setSleepField = (key, val) => setSleepForm(f => ({ ...f, [key]: val }));
+  const setHealthField = (key, val) => setHealthForm(f => ({ ...f, [key]: val }));
+  const setFinanceField = (key, val) => setFinanceForm(f => ({ ...f, [key]: val }));
+
+  // Finance summary
+  const totalIncome = financeLog.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const totalExpense = financeLog.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const balance = totalIncome - totalExpense;
+
+  const openLogModal = () => {
+    if (tab === 'mood') setShowMoodModal(true);
+    else if (tab === 'sleep') setShowSleepModal(true);
+    else if (tab === 'health') setShowHealthModal(true);
+    else setShowFinanceModal(true);
+  };
+
+  const logLabel = { mood: 'Mood', sleep: 'Sleep', health: 'Health', finance: 'Finance' };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">Trackers</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Mood &amp; Sleep tracking</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Mood, Sleep, Health &amp; Finance tracking</p>
         </div>
-        <Button variant="primary" onClick={() => tab === 'mood' ? setShowMoodModal(true) : setShowSleepModal(true)}>
-          <Plus size={16} /> Log {tab === 'mood' ? 'Mood' : 'Sleep'}
+        <Button variant="primary" onClick={openLogModal}>
+          <Plus size={16} /> Log {logLabel[tab]}
         </Button>
       </div>
 
-      <div className="flex gap-2">
-        <button onClick={() => setTab('mood')} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === 'mood' ? 'bg-primary text-white' : 'bg-white dark:bg-white/5 text-gray-500'}`}>
-          😊 Mood
-        </button>
-        <button onClick={() => setTab('sleep')} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === 'sleep' ? 'bg-primary text-white' : 'bg-white dark:bg-white/5 text-gray-500'}`}>
-          🌙 Sleep
-        </button>
+      {/* Tab Bar */}
+      <div className="flex gap-2 flex-wrap">
+        {TABS.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${tab === t.key ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-white dark:bg-white/5 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/10'}`}
+          >
+            {t.emoji} {t.label}
+          </button>
+        ))}
       </div>
 
+      {/* ── MOOD TAB ── */}
       {tab === 'mood' && (
         <div className="grid gap-3">
           {moodLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No mood entries yet. Log your mood!</p></Card>}
@@ -130,6 +214,7 @@ const Trackers = () => {
         </div>
       )}
 
+      {/* ── SLEEP TAB ── */}
       {tab === 'sleep' && (
         <div className="grid gap-3">
           {sleepLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No sleep entries yet. Log your sleep!</p></Card>}
@@ -149,6 +234,108 @@ const Trackers = () => {
               <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* ── HEALTH TAB ── */}
+      {tab === 'health' && (
+        <div className="space-y-4">
+          {healthLog.length > 0 && (() => {
+            const avgWater = Math.round(healthLog.reduce((s,e)=>s+e.water,0)/healthLog.length);
+            const avgExercise = Math.round(healthLog.reduce((s,e)=>s+e.exercise,0)/healthLog.length);
+            const latestWithWeight = healthLog.find(e=>e.weight);
+            return (
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Avg Water', value: `${avgWater} cups`, icon: Droplets, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+                  { label: 'Avg Exercise', value: `${avgExercise} min`, icon: Dumbbell, color: 'text-accent', bg: 'bg-green-50 dark:bg-green-900/20' },
+                  { label: 'Latest Weight', value: latestWithWeight ? `${latestWithWeight.weight} kg` : '—', icon: Scale, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+                ].map(s => (
+                  <Card key={s.label} className={`${s.bg} border-0`}>
+                    <div className="flex items-center gap-2">
+                      <s.icon size={16} className={s.color} />
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{s.label}</span>
+                    </div>
+                    <p className={`text-xl font-bold font-mono mt-1 ${s.color}`}>{s.value}</p>
+                  </Card>
+                ))}
+              </div>
+            );
+          })()}
+          <div className="grid gap-3">
+            {healthLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No health entries yet. Start tracking!</p></Card>}
+            {healthLog.map(entry => (
+              <Card key={entry.id} className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 flex-shrink-0">
+                  <Dumbbell size={18} className="text-accent" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-medium text-sm text-text-dark dark:text-text-light">{entry.date}</h3>
+                    <Badge color="blue"><Droplets size={10} className="inline" /> {entry.water} cups</Badge>
+                    <Badge color="green"><Dumbbell size={10} className="inline" /> {entry.exercise} min</Badge>
+                    {entry.weight && <Badge color="purple">{entry.weight} kg</Badge>}
+                  </div>
+                  {entry.notes && <p className="text-xs text-gray-400 mt-1">{entry.notes}</p>}
+                </div>
+                <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── FINANCE TAB ── */}
+      {tab === 'finance' && (
+        <div className="space-y-4">
+          {/* Summary cards */}
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="bg-green-50 dark:bg-green-900/20 border-0">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={16} className="text-green-600" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Income</span>
+              </div>
+              <p className="text-xl font-bold font-mono mt-1 text-green-600">${totalIncome.toFixed(2)}</p>
+            </Card>
+            <Card className="bg-red-50 dark:bg-red-900/20 border-0">
+              <div className="flex items-center gap-2">
+                <TrendingDown size={16} className="text-red-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Expenses</span>
+              </div>
+              <p className="text-xl font-bold font-mono mt-1 text-red-500">${totalExpense.toFixed(2)}</p>
+            </Card>
+            <Card className={`border-0 ${balance >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
+              <div className="flex items-center gap-2">
+                <DollarSign size={16} className={balance >= 0 ? 'text-primary' : 'text-orange-500'} />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Balance</span>
+              </div>
+              <p className={`text-xl font-bold font-mono mt-1 ${balance >= 0 ? 'text-primary' : 'text-orange-500'}`}>${balance.toFixed(2)}</p>
+            </Card>
+          </div>
+
+          <div className="grid gap-3">
+            {financeLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No finance entries yet. Start tracking!</p></Card>}
+            {financeLog.map(entry => (
+              <Card key={entry.id} className="flex items-center gap-4">
+                <div className={`p-3 rounded-xl flex-shrink-0 ${entry.type === 'income' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                  {entry.type === 'income' ? <TrendingUp size={18} className="text-green-600" /> : <TrendingDown size={18} className="text-red-500" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-medium text-sm text-text-dark dark:text-text-light truncate">{entry.description || entry.category}</h3>
+                    <Badge color={entry.type === 'income' ? 'green' : 'red'}>{entry.category}</Badge>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{entry.date}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className={`font-bold text-sm font-mono ${entry.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>
+                    {entry.type === 'income' ? '+' : '-'}${entry.amount.toFixed(2)}
+                  </p>
+                </div>
+                <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 
@@ -202,6 +389,62 @@ const Trackers = () => {
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="ghost" onClick={() => { setShowSleepModal(false); setSleepErrors({}); }} className="flex-1 justify-center">Cancel</Button>
             <Button type="submit" variant="primary" className="flex-1 justify-center">Log Sleep</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Log Health Modal */}
+      <Modal isOpen={showHealthModal} onClose={() => setShowHealthModal(false)} title="Log Health" size="sm">
+        <form onSubmit={handleHealthSubmit} className="space-y-4">
+          <Input label="Date" type="date" value={healthForm.date} onChange={e => setHealthField('date', e.target.value)} />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">💧 Water Intake: {healthForm.water} cups</label>
+            <input type="range" min="0" max="20" value={healthForm.water} onChange={e => setHealthField('water', Number(e.target.value))} className="w-full accent-primary" />
+            <div className="flex justify-between text-xs text-gray-400"><span>0</span><span>20 cups</span></div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">🏃 Exercise: {healthForm.exercise} min</label>
+            <input type="range" min="0" max="180" step="5" value={healthForm.exercise} onChange={e => setHealthField('exercise', Number(e.target.value))} className="w-full accent-primary" />
+            <div className="flex justify-between text-xs text-gray-400"><span>0</span><span>180 min</span></div>
+          </div>
+          <Input label="Weight (kg, optional)" type="number" step="0.1" placeholder="e.g. 65.5" value={healthForm.weight} onChange={e => setHealthField('weight', e.target.value)} />
+          <Input label="Notes (optional)" placeholder="How do you feel?" value={healthForm.notes} onChange={e => setHealthField('notes', e.target.value)} />
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setShowHealthModal(false)} className="flex-1 justify-center">Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1 justify-center">Log Health</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Log Finance Modal */}
+      <Modal isOpen={showFinanceModal} onClose={() => { setShowFinanceModal(false); setFinanceErrors({}); }} title="Log Finance" size="sm">
+        <form onSubmit={handleFinanceSubmit} className="space-y-4">
+          <div className="flex gap-2">
+            {['expense', 'income'].map(t => (
+              <button key={t} type="button" onClick={() => {
+                setFinanceField('type', t);
+                setFinanceField('category', t === 'income' ? 'Salary' : 'Food');
+              }}
+                className={`flex-1 py-2 rounded-xl text-sm font-medium capitalize transition-all border-2 ${financeForm.type === t ? (t === 'income' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400') : 'border-gray-100 dark:border-white/10 text-gray-500 hover:border-gray-200'}`}>
+                {t === 'income' ? '📈' : '📉'} {t}
+              </button>
+            ))}
+          </div>
+          <Input label="Amount ($)" type="number" step="0.01" placeholder="0.00" value={financeForm.amount} onChange={e => setFinanceField('amount', e.target.value)} error={financeErrors.amount} />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Category</label>
+            <select value={financeForm.category} onChange={e => setFinanceField('category', e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-700 text-text-dark dark:text-text-light text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+              {(financeForm.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <Input label="Description (optional)" placeholder="e.g. Lunch at cafe" value={financeForm.description} onChange={e => setFinanceField('description', e.target.value)} />
+          <Input label="Date" type="date" value={financeForm.date} onChange={e => setFinanceField('date', e.target.value)} error={financeErrors.date} />
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="ghost" onClick={() => { setShowFinanceModal(false); setFinanceErrors({}); }} className="flex-1 justify-center">Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1 justify-center">Log {financeForm.type === 'income' ? 'Income' : 'Expense'}</Button>
           </div>
         </form>
       </Modal>

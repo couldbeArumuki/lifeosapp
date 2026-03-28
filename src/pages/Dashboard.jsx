@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity } from 'lucide-react';
+import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity, Dumbbell, DollarSign } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -25,6 +25,14 @@ const StatCard = ({ icon, label, value, sub, color, bg }) => {
   );
 };
 
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 5)  return { text: 'Good night', emoji: '🌙' };
+  if (h < 12) return { text: 'Good morning', emoji: '☀️' };
+  if (h < 17) return { text: 'Good afternoon', emoji: '🌤️' };
+  return { text: 'Good evening', emoji: '🌆' };
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [tasks] = useState(() => getData('tasks', []));
@@ -32,6 +40,8 @@ const Dashboard = () => {
   const [studyLog] = useState(() => getData('studyLog', []));
   const [moodLog] = useState(() => getData('moodLog', []));
   const [sleepLog] = useState(() => getData('sleepLog', []));
+  const [healthLog] = useState(() => getData('healthLog', []));
+  const [financeLog] = useState(() => getData('financeLog', []));
 
   const weeklyData = computeWeeklyData(studyLog, tasks, moodLog);
 
@@ -42,6 +52,11 @@ const Dashboard = () => {
   const todayMood = moodLog.find(m => m.date === today);
   const lastSleep = sleepLog[0];
   const habitsCompletedToday = habits.filter(h => h.completedDates?.includes(today)).length;
+  const todayHealth = healthLog.find(h => h.date === today);
+  const monthStart = today.slice(0, 7);
+  const monthExpenses = financeLog.filter(e => e.type === 'expense' && e.date?.startsWith(monthStart)).reduce((s, e) => s + e.amount, 0);
+
+  const { text: greetText, emoji: greetEmoji } = getGreeting();
 
   const recentActivities = [
     ...studyLog.slice(0, 2).map(s => ({ type: 'study', text: `Studied ${s.subject} for ${s.duration} min`, time: s.date })),
@@ -50,20 +65,31 @@ const Dashboard = () => {
   ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">
-          Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}! 👋
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Here&apos;s your daily overview</p>
+    <div className="space-y-6 animate-slide-up">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">
+            {greetText}! {greetEmoji}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Here&apos;s your daily overview</p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 bg-primary/10 dark:bg-primary/20 rounded-xl px-3 py-2">
+          <span className="text-xl">{todayMood?.emoji || '🙂'}</span>
+          <div>
+            <p className="text-xs font-medium text-primary">Today&apos;s Mood</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{todayMood?.mood || 'Not logged'}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         <StatCard icon={CheckSquare} label="Tasks Today" value={`${completedToday}/${todayTasks.length}`} sub="completed" color="text-primary" bg="bg-primary/5 dark:bg-primary/10" />
         <StatCard icon={Target} label="Habits" value={`${habitsCompletedToday}/${habits.length}`} sub="done today" color="text-secondary" bg="bg-secondary/5 dark:bg-secondary/10" />
         <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" />
         <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" />
         <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" />
+        <StatCard icon={Dumbbell} label="Exercise" value={todayHealth ? `${todayHealth.exercise}m` : '—'} sub={todayHealth ? `💧 ${todayHealth.water} cups` : 'not logged'} color="text-accent" bg="bg-green-50 dark:bg-green-900/10" />
+        <StatCard icon={DollarSign} label="Month Spend" value={`$${monthExpenses.toFixed(0)}`} sub="this month" color="text-orange-500" bg="bg-orange-50 dark:bg-orange-900/10" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -114,6 +140,8 @@ const Dashboard = () => {
               { label: 'Log Mood', icon: Smile, color: 'secondary', path: '/trackers' },
               { label: 'Study Session', icon: BookOpen, color: 'tertiary', path: '/study-log' },
               { label: 'Log Sleep', icon: Moon, color: 'ghost', path: '/trackers' },
+              { label: 'Log Health', icon: Dumbbell, color: 'outline', path: '/trackers' },
+              { label: 'Log Finance', icon: DollarSign, color: 'ghost', path: '/trackers' },
             ].map(({ label, icon, color, path }) => {
               const Icon = icon;
               return (
