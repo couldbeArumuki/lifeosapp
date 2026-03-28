@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Moon, Trash2, Droplets, Dumbbell, DollarSign, TrendingUp, TrendingDown, Scale } from 'lucide-react';
+import { Plus, Moon, Trash2, Droplets, Dumbbell, Banknote, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -27,6 +27,8 @@ const defaultMoodForm = { mood: 'happy', intensity: 3, notes: '', date: new Date
 const defaultSleepForm = { bedtime: '23:00', wakeTime: '07:00', quality: 4, notes: '', date: new Date().toISOString().split('T')[0] };
 const defaultHealthForm = { water: 8, exercise: 30, weight: '', date: new Date().toISOString().split('T')[0], notes: '' };
 const defaultFinanceForm = { type: 'expense', amount: '', category: 'Food', description: '', date: new Date().toISOString().split('T')[0] };
+
+const formatIDR = (amount) => `Rp ${Math.round(amount).toLocaleString('id-ID')}`;
 
 const calcSleepDuration = (bedtime, wakeTime) => {
   const [bh, bm] = bedtime.split(':').map(Number);
@@ -128,7 +130,7 @@ const Trackers = () => {
     const entry = {
       id: Date.now(),
       type: financeForm.type,
-      amount: Math.round(Number(financeForm.amount) * 100) / 100,
+      amount: Math.round(Number(financeForm.amount)),
       category: financeForm.category,
       description: financeForm.description.trim(),
       date: financeForm.date,
@@ -295,21 +297,21 @@ const Trackers = () => {
                 <TrendingUp size={16} className="text-green-600" />
                 <span className="text-xs text-gray-500 dark:text-gray-400">Income</span>
               </div>
-              <p className="text-xl font-bold font-mono mt-1 text-green-600">${totalIncome.toFixed(2)}</p>
+              <p className="text-xl font-bold font-mono mt-1 text-green-600">{formatIDR(totalIncome)}</p>
             </Card>
             <Card className="bg-red-50 dark:bg-red-900/20 border-0">
               <div className="flex items-center gap-2">
                 <TrendingDown size={16} className="text-red-500" />
                 <span className="text-xs text-gray-500 dark:text-gray-400">Expenses</span>
               </div>
-              <p className="text-xl font-bold font-mono mt-1 text-red-500">${totalExpense.toFixed(2)}</p>
+              <p className="text-xl font-bold font-mono mt-1 text-red-500">{formatIDR(totalExpense)}</p>
             </Card>
             <Card className={`border-0 ${balance >= 0 ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
               <div className="flex items-center gap-2">
-                <DollarSign size={16} className={balance >= 0 ? 'text-primary' : 'text-orange-500'} />
+                <Banknote size={16} className={balance >= 0 ? 'text-primary' : 'text-orange-500'} />
                 <span className="text-xs text-gray-500 dark:text-gray-400">Balance</span>
               </div>
-              <p className={`text-xl font-bold font-mono mt-1 ${balance >= 0 ? 'text-primary' : 'text-orange-500'}`}>${balance.toFixed(2)}</p>
+              <p className={`text-xl font-bold font-mono mt-1 ${balance >= 0 ? 'text-primary' : 'text-orange-500'}`}>{formatIDR(balance)}</p>
             </Card>
           </div>
 
@@ -329,7 +331,7 @@ const Trackers = () => {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className={`font-bold text-sm font-mono ${entry.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>
-                    {entry.type === 'income' ? '+' : '-'}${entry.amount.toFixed(2)}
+                    {entry.type === 'income' ? '+' : '-'}{formatIDR(entry.amount)}
                   </p>
                 </div>
                 <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
@@ -430,7 +432,7 @@ const Trackers = () => {
               </button>
             ))}
           </div>
-          <Input label="Amount ($)" type="number" step="0.01" placeholder="0.00" value={financeForm.amount} onChange={e => setFinanceField('amount', e.target.value)} error={financeErrors.amount} />
+          <Input label="Amount (Rp)" type="number" step="1" placeholder="0" value={financeForm.amount} onChange={e => setFinanceField('amount', e.target.value)} error={financeErrors.amount} />
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Category</label>
             <select value={financeForm.category} onChange={e => setFinanceField('category', e.target.value)}
