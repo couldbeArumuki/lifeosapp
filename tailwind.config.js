@@ -13,6 +13,10 @@ export default {
         'bg-dark': '#1A1A1A',
         'text-dark': '#2D3436',
         'text-light': '#F5F5F5',
+        'accent-blue': '#6B9BD1',
+        'accent-purple': '#9B5DE5',
+        'accent-green': '#06D6A0',
+        'accent-rose': '#F72585',
       },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],

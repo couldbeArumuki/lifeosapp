@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Moon, Trash2 } from 'lucide-react';
+import { Plus, Moon, Trash2, Droplets, Dumbbell } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -20,8 +20,12 @@ const MOODS = [
   { key: 'anxious', emoji: '😰', label: 'Anxious' },
 ];
 
+const EXERCISE_TYPES = ['Running', 'Cycling', 'Swimming', 'Gym', 'Yoga', 'Walking', 'Other'];
+const WATER_GOAL = 8;
+
 const defaultMoodForm = { mood: 'happy', intensity: 3, notes: '', date: new Date().toISOString().split('T')[0] };
 const defaultSleepForm = { bedtime: '23:00', wakeTime: '07:00', quality: 4, notes: '', date: new Date().toISOString().split('T')[0] };
+const defaultExerciseForm = { type: 'Running', duration: '', calories: '', notes: '', date: new Date().toISOString().split('T')[0] };
 
 const calcSleepDuration = (bedtime, wakeTime) => {
   const [bh, bm] = bedtime.split(':').map(Number);
@@ -32,21 +36,30 @@ const calcSleepDuration = (bedtime, wakeTime) => {
 };
 
 const Trackers = () => {
-  const [moodLog, setMoodLog] = useState(() => {
-    return getData('moodLog', []);
-  });
+  const [moodLog, setMoodLog] = useState(() => getData('moodLog', []));
   const [sleepLog, setSleepLog] = useState(() => getData('sleepLog', []));
+  const [waterLog, setWaterLog] = useState(() => getData('waterLog', []));
+  const [exerciseLog, setExerciseLog] = useState(() => getData('exerciseLog', []));
   const [tab, setTab] = useState('mood');
   const [showMoodModal, setShowMoodModal] = useState(false);
   const [showSleepModal, setShowSleepModal] = useState(false);
+  const [showExerciseModal, setShowExerciseModal] = useState(false);
   const [moodForm, setMoodForm] = useState(defaultMoodForm);
   const [sleepForm, setSleepForm] = useState(defaultSleepForm);
+  const [exerciseForm, setExerciseForm] = useState(defaultExerciseForm);
+  const [exerciseErrors, setExerciseErrors] = useState({});
   const [sleepErrors, setSleepErrors] = useState({});
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const { toasts, addToast, removeToast } = useToast();
 
-  const persistMood = (updated) => { setMoodLog(updated); saveData('moodLog', updated); };
-  const persistSleep = (updated) => { setSleepLog(updated); saveData('sleepLog', updated); };
+  const today = new Date().toISOString().split('T')[0];
+  const todayWater = waterLog.find(w => w.date === today);
+  const todayGlasses = todayWater?.glasses || 0;
+
+  const persistMood = (u) => { setMoodLog(u); saveData('moodLog', u); };
+  const persistSleep = (u) => { setSleepLog(u); saveData('sleepLog', u); };
+  const persistWater = (u) => { setWaterLog(u); saveData('waterLog', u); };
+  const persistExercise = (u) => { setExerciseLog(u); saveData('exerciseLog', u); };
 
   const handleMoodSubmit = (e) => {
     e.preventDefault();
@@ -79,42 +92,97 @@ const Trackers = () => {
     setSleepErrors({});
   };
 
+  const adjustWater = (delta) => {
+    const newGlasses = Math.max(0, Math.min(20, todayGlasses + delta));
+    if (todayWater) {
+      const updated = waterLog.map(w => w.date === today ? { ...w, glasses: newGlasses } : w);
+      persistWater(updated);
+    } else {
+      persistWater([{ id: Date.now(), date: today, glasses: newGlasses }, ...waterLog]);
+    }
+    if (delta > 0) addToast('Water logged! 💧', 'success');
+  };
+
+  const validateExercise = () => {
+    const e = {};
+    if (!exerciseForm.duration || isNaN(Number(exerciseForm.duration)) || Number(exerciseForm.duration) <= 0) e.duration = 'Enter valid duration';
+    if (!exerciseForm.date) e.date = 'Date is required';
+    setExerciseErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleExerciseSubmit = (e) => {
+    e.preventDefault();
+    if (!validateExercise()) return;
+    const entry = { id: Date.now(), type: exerciseForm.type, duration: Number(exerciseForm.duration), calories: exerciseForm.calories ? Number(exerciseForm.calories) : null, notes: exerciseForm.notes.trim(), date: exerciseForm.date };
+    persistExercise([entry, ...exerciseLog]);
+    addToast('Exercise logged! 💪', 'success');
+    setShowExerciseModal(false);
+    setExerciseForm(defaultExerciseForm);
+    setExerciseErrors({});
+  };
+
   const handleDelete = () => {
-    if (tab === 'mood') persistMood(moodLog.filter(e => e.id !== deleteConfirm));
-    else persistSleep(sleepLog.filter(e => e.id !== deleteConfirm));
+    const deleteTab = tab;
+    if (deleteTab === 'mood') persistMood(moodLog.filter(e => e.id !== deleteConfirm));
+    else if (deleteTab === 'sleep') persistSleep(sleepLog.filter(e => e.id !== deleteConfirm));
+    else if (deleteTab === 'exercise') persistExercise(exerciseLog.filter(e => e.id !== deleteConfirm));
     setDeleteConfirm(null);
     addToast('Entry deleted.', 'info');
   };
 
   const setMoodField = (key, val) => setMoodForm(f => ({ ...f, [key]: val }));
   const setSleepField = (key, val) => setSleepForm(f => ({ ...f, [key]: val }));
+  const setExerciseField = (key, val) => setExerciseForm(f => ({ ...f, [key]: val }));
+
+  const waterPct = Math.min(100, (todayGlasses / WATER_GOAL) * 100);
+
+  const getAddButtonLabel = () => {
+    if (tab === 'mood') return 'Log Mood';
+    if (tab === 'sleep') return 'Log Sleep';
+    if (tab === 'exercise') return 'Log Exercise';
+    return null;
+  };
+
+  const handleAddButton = () => {
+    if (tab === 'mood') setShowMoodModal(true);
+    else if (tab === 'sleep') setShowSleepModal(true);
+    else if (tab === 'exercise') setShowExerciseModal(true);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">Trackers</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Mood &amp; Sleep tracking</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Mood, Sleep, Water & Exercise</p>
         </div>
-        <Button variant="primary" onClick={() => tab === 'mood' ? setShowMoodModal(true) : setShowSleepModal(true)}>
-          <Plus size={16} /> Log {tab === 'mood' ? 'Mood' : 'Sleep'}
-        </Button>
+        {tab !== 'water' && (
+          <Button variant="primary" onClick={handleAddButton}>
+            <Plus size={16} /> {getAddButtonLabel()}
+          </Button>
+        )}
       </div>
 
-      <div className="flex gap-2">
-        <button onClick={() => setTab('mood')} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === 'mood' ? 'bg-primary text-white' : 'bg-white dark:bg-white/5 text-gray-500'}`}>
-          😊 Mood
-        </button>
-        <button onClick={() => setTab('sleep')} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === 'sleep' ? 'bg-primary text-white' : 'bg-white dark:bg-white/5 text-gray-500'}`}>
-          🌙 Sleep
-        </button>
+      <div className="flex gap-2 flex-wrap">
+        {[
+          { key: 'mood', label: '😊 Mood' },
+          { key: 'sleep', label: '🌙 Sleep' },
+          { key: 'water', label: '💧 Water' },
+          { key: 'exercise', label: '💪 Exercise' },
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${tab === t.key ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-white dark:bg-white/5 text-gray-500'}`}>
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {tab === 'mood' && (
         <div className="grid gap-3">
           {moodLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No mood entries yet. Log your mood!</p></Card>}
           {moodLog.map(entry => (
-            <Card key={entry.id} className="flex items-center gap-4">
+            <Card key={entry.id} className="flex items-center gap-4 animate-fade-in">
               <span className="text-3xl">{entry.emoji}</span>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -122,7 +190,7 @@ const Trackers = () => {
                   <Badge color={moodColors[entry.mood] || 'gray'}>Intensity {entry.intensity}/5</Badge>
                 </div>
                 {entry.notes && <p className="text-xs text-gray-400 mt-1">{entry.notes}</p>}
-                <p className="text-xs text-gray-300 mt-1">{entry.date}</p>
+                <p className="text-xs text-gray-400 mt-1">{entry.date}</p>
               </div>
               <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
             </Card>
@@ -134,7 +202,7 @@ const Trackers = () => {
         <div className="grid gap-3">
           {sleepLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No sleep entries yet. Log your sleep!</p></Card>}
           {sleepLog.map(entry => (
-            <Card key={entry.id} className="flex items-start gap-4">
+            <Card key={entry.id} className="flex items-start gap-4 animate-fade-in">
               <div className="p-3 rounded-xl bg-secondary/10 flex-shrink-0">
                 <Moon size={18} className="text-secondary" />
               </div>
@@ -145,6 +213,91 @@ const Trackers = () => {
                   <Badge color={entry.quality >= 4 ? 'green' : entry.quality >= 3 ? 'yellow' : 'red'}>Quality {entry.quality}/5</Badge>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">{entry.bedtime} → {entry.wakeTime}{entry.notes ? ` • ${entry.notes}` : ''}</p>
+              </div>
+              <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {tab === 'water' && (
+        <div className="space-y-4 animate-fade-in">
+          <Card>
+            <div className="text-center space-y-4">
+              <div>
+                <h3 className="font-heading font-semibold text-text-dark dark:text-text-light">Daily Water Intake</h3>
+                <p className="text-sm text-gray-400">Goal: {WATER_GOAL} glasses per day</p>
+              </div>
+              <div className="flex justify-center">
+                <div className="relative w-40 h-40">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5e7eb" strokeWidth="2.5" className="dark:stroke-white/10" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#6B9BD1" strokeWidth="2.5"
+                      strokeDasharray={`${waterPct} 100`} strokeLinecap="round" className="transition-all duration-500" />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl">💧</span>
+                    <span className="text-2xl font-bold font-mono text-primary">{todayGlasses}</span>
+                    <span className="text-xs text-gray-400">of {WATER_GOAL}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-center flex-wrap">
+                {Array.from({ length: WATER_GOAL }).map((_, i) => (
+                  <span key={i} className={`text-xl transition-all duration-300 ${i < todayGlasses ? 'opacity-100' : 'opacity-20'}`}>🥤</span>
+                ))}
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-white/10 rounded-full h-2">
+                <div className="h-full bg-gradient-to-r from-blue-400 to-primary rounded-full transition-all duration-500" style={{ width: `${waterPct}%` }} />
+              </div>
+              <p className="text-sm text-gray-500">{waterPct >= 100 ? '🎉 Daily goal reached!' : `${WATER_GOAL - todayGlasses} more to reach your goal`}</p>
+              <div className="flex gap-3 justify-center">
+                <Button variant="ghost" onClick={() => adjustWater(-1)} disabled={todayGlasses === 0}>
+                  − Remove
+                </Button>
+                <Button variant="primary" onClick={() => adjustWater(1)} disabled={todayGlasses >= 20}>
+                  <Droplets size={16} /> + Add Glass
+                </Button>
+              </div>
+            </div>
+          </Card>
+          <div className="grid gap-3">
+            <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400">History</h3>
+            {waterLog.length === 0 && <Card><p className="text-center text-gray-400 py-2 text-sm">No water history yet.</p></Card>}
+            {waterLog.slice(0, 7).map(entry => (
+              <Card key={entry.id} className="flex items-center gap-4 py-3">
+                <span className="text-2xl">💧</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm text-text-dark dark:text-text-light">{entry.date}</span>
+                    <Badge color={entry.glasses >= WATER_GOAL ? 'green' : 'blue'}>{entry.glasses} glasses</Badge>
+                  </div>
+                  <div className="mt-1 w-full bg-gray-100 dark:bg-white/10 rounded-full h-1.5">
+                    <div className="h-full bg-blue-400 rounded-full" style={{ width: `${Math.min(100, (entry.glasses / WATER_GOAL) * 100)}%` }} />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === 'exercise' && (
+        <div className="grid gap-3">
+          {exerciseLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No exercise entries yet. Log your workout!</p></Card>}
+          {exerciseLog.map(entry => (
+            <Card key={entry.id} className="flex items-start gap-4 animate-fade-in">
+              <div className="p-3 rounded-xl bg-accent/10 flex-shrink-0">
+                <Dumbbell size={18} className="text-accent" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-medium text-sm text-text-dark dark:text-text-light">{entry.type}</h3>
+                  <Badge color="green">{entry.duration} min</Badge>
+                  {entry.calories && <Badge color="yellow">{entry.calories} cal</Badge>}
+                </div>
+                {entry.notes && <p className="text-xs text-gray-400 mt-1">{entry.notes}</p>}
+                <p className="text-xs text-gray-400 mt-1">{entry.date}</p>
               </div>
               <button onClick={() => setDeleteConfirm(entry.id)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"><Trash2 size={14} /></button>
             </Card>
@@ -202,6 +355,28 @@ const Trackers = () => {
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="ghost" onClick={() => { setShowSleepModal(false); setSleepErrors({}); }} className="flex-1 justify-center">Cancel</Button>
             <Button type="submit" variant="primary" className="flex-1 justify-center">Log Sleep</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Log Exercise Modal */}
+      <Modal isOpen={showExerciseModal} onClose={() => { setShowExerciseModal(false); setExerciseErrors({}); }} title="Log Exercise">
+        <form onSubmit={handleExerciseSubmit} className="space-y-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Exercise Type</label>
+            <select value={exerciseForm.type} onChange={e => setExerciseField('type', e.target.value)} className="w-full rounded-xl px-4 py-2.5 text-sm border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-text-dark dark:text-text-light focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all">
+              {EXERCISE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Duration (min)" type="number" placeholder="30" value={exerciseForm.duration} onChange={e => setExerciseField('duration', e.target.value)} error={exerciseErrors.duration} min="1" />
+            <Input label="Calories (optional)" type="number" placeholder="200" value={exerciseForm.calories} onChange={e => setExerciseField('calories', e.target.value)} min="0" />
+          </div>
+          <Input label="Date" type="date" value={exerciseForm.date} onChange={e => setExerciseField('date', e.target.value)} error={exerciseErrors.date} />
+          <Input label="Notes (optional)" placeholder="How was your workout?" value={exerciseForm.notes} onChange={e => setExerciseField('notes', e.target.value)} />
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="ghost" onClick={() => { setShowExerciseModal(false); setExerciseErrors({}); }} className="flex-1 justify-center">Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1 justify-center">Log Exercise</Button>
           </div>
         </form>
       </Modal>

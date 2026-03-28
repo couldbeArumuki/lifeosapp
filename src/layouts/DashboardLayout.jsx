@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, Target, BookOpen, PenLine,
   Activity, Trophy, BarChart3, Globe, Menu, X, Sun, Moon,
-  ChevronRight
+  ChevronRight, Wallet, Palette
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
@@ -14,14 +14,22 @@ const navItems = [
   { path: '/japanese-learning', label: 'Japanese', icon: BookOpen },
   { path: '/study-log', label: 'Study Log', icon: PenLine },
   { path: '/trackers', label: 'Trackers', icon: Activity },
+  { path: '/finance', label: 'Finance', icon: Wallet },
   { path: '/goals', label: 'Goals', icon: Trophy },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/public', label: 'Public View', icon: Globe },
 ];
 
+const ACCENT_COLORS = [
+  { key: 'blue', hex: '#6B9BD1' },
+  { key: 'purple', hex: '#9B5DE5' },
+  { key: 'green', hex: '#06D6A0' },
+  { key: 'rose', hex: '#F72585' },
+];
+
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, accent, setAccent } = useTheme();
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -72,7 +80,22 @@ const DashboardLayout = ({ children }) => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100 dark:border-white/10">
+        <div className="p-4 border-t border-gray-100 dark:border-white/10 space-y-2">
+          <div className="flex items-center gap-2 px-3 py-2">
+            <Palette size={16} className="text-gray-400" />
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400 flex-1">Accent</span>
+            <div className="flex gap-1.5">
+              {ACCENT_COLORS.map(({ key, hex }) => (
+                <button
+                  key={key}
+                  onClick={() => setAccent(key)}
+                  title={key}
+                  className={`w-5 h-5 rounded-full transition-all duration-200 ${accent === key ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-offset-gray-900' : ''}`}
+                  style={{ backgroundColor: hex }}
+                />
+              ))}
+            </div>
+          </div>
           <button
             onClick={toggleTheme}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-dark dark:hover:text-text-light transition-all duration-200"

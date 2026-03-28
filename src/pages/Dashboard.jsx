@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity } from 'lucide-react';
+import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity, Wallet } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -7,10 +7,10 @@ import { getData } from '../utils/localStorage';
 import { computeWeeklyData } from '../utils/localStorage';
 import { useNavigate } from 'react-router-dom';
 
-const StatCard = ({ icon, label, value, sub, color, bg }) => {
+const StatCard = ({ icon, label, value, sub, color, bg, style }) => {
   const Icon = icon;
   return (
-    <Card className={`${bg} border-0`}>
+    <Card className={`${bg} border-0 animate-slide-up`} style={style}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
@@ -32,6 +32,8 @@ const Dashboard = () => {
   const [studyLog] = useState(() => getData('studyLog', []));
   const [moodLog] = useState(() => getData('moodLog', []));
   const [sleepLog] = useState(() => getData('sleepLog', []));
+  const [financeIncome] = useState(() => getData('financeIncome', []));
+  const [financeExpense] = useState(() => getData('financeExpense', []));
 
   const weeklyData = computeWeeklyData(studyLog, tasks, moodLog);
 
@@ -43,6 +45,12 @@ const Dashboard = () => {
   const lastSleep = sleepLog[0];
   const habitsCompletedToday = habits.filter(h => h.completedDates?.includes(today)).length;
 
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const monthIncome = financeIncome.filter(e => e.date.startsWith(thisMonth)).reduce((s, e) => s + e.amount, 0);
+  const monthExpense = financeExpense.filter(e => e.date.startsWith(thisMonth)).reduce((s, e) => s + e.amount, 0);
+  const netBalance = monthIncome - monthExpense;
+  const fmtIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0, notation: 'compact' }).format(n);
+
   const recentActivities = [
     ...studyLog.slice(0, 2).map(s => ({ type: 'study', text: `Studied ${s.subject} for ${s.duration} min`, time: s.date })),
     ...moodLog.slice(0, 1).map(m => ({ type: 'mood', text: `Logged mood: ${m.mood} ${m.emoji}`, time: m.date })),
@@ -50,7 +58,7 @@ const Dashboard = () => {
   ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-heading font-bold text-text-dark dark:text-text-light">
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}! 👋
@@ -58,12 +66,13 @@ const Dashboard = () => {
         <p className="text-gray-500 dark:text-gray-400 mt-1">Here&apos;s your daily overview</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard icon={CheckSquare} label="Tasks Today" value={`${completedToday}/${todayTasks.length}`} sub="completed" color="text-primary" bg="bg-primary/5 dark:bg-primary/10" />
-        <StatCard icon={Target} label="Habits" value={`${habitsCompletedToday}/${habits.length}`} sub="done today" color="text-secondary" bg="bg-secondary/5 dark:bg-secondary/10" />
-        <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" />
-        <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" />
-        <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <StatCard icon={CheckSquare} label="Tasks Today" value={`${completedToday}/${todayTasks.length}`} sub="completed" color="text-primary" bg="bg-primary/5 dark:bg-primary/10" style={{ animationDelay: '0ms' }} />
+        <StatCard icon={Target} label="Habits" value={`${habitsCompletedToday}/${habits.length}`} sub="done today" color="text-secondary" bg="bg-secondary/5 dark:bg-secondary/10" style={{ animationDelay: '60ms' }} />
+        <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" style={{ animationDelay: '120ms' }} />
+        <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" style={{ animationDelay: '180ms' }} />
+        <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" style={{ animationDelay: '240ms' }} />
+        <StatCard icon={Wallet} label="Finance" value={fmtIDR(netBalance)} sub={netBalance >= 0 ? 'net positive' : 'net negative'} color={netBalance >= 0 ? 'text-green-600' : 'text-red-500'} bg={netBalance >= 0 ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10'} style={{ animationDelay: '300ms' }} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

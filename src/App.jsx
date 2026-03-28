@@ -10,6 +10,7 @@ import Trackers from './pages/Trackers';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
 import PublicProfile from './pages/PublicProfile';
+import Finance from './pages/Finance';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route element={<DashboardLayout><JapaneseLearning /></DashboardLayout>} path="/japanese-learning" />
           <Route element={<DashboardLayout><StudyLog /></DashboardLayout>} path="/study-log" />
           <Route element={<DashboardLayout><Trackers /></DashboardLayout>} path="/trackers" />
+          <Route element={<DashboardLayout><Finance /></DashboardLayout>} path="/finance" />
           <Route element={<DashboardLayout><Goals /></DashboardLayout>} path="/goals" />
           <Route element={<DashboardLayout><Analytics /></DashboardLayout>} path="/analytics" />
           <Route element={<PublicProfile />} path="/public" />
