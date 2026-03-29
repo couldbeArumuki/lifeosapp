@@ -13,7 +13,7 @@ const navItems = [
   { path: '/habits', label: 'Habits', icon: Target },
   { path: '/japanese-learning', label: 'Japanese', icon: BookOpen },
   { path: '/study-log', label: 'Study Log', icon: PenLine },
-  { path: '/trackers', label: 'Trackers', icon: Activity },
+  { path: '/mytrace', label: 'MYTrace', icon: Activity },
   { path: '/goals', label: 'Goals', icon: Trophy },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/todo', label: 'Todo List', icon: ClipboardList },
