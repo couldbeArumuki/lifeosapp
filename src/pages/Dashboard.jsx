@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity, Dumbbell, DollarSign } from 'lucide-react';
+import { CheckSquare, Target, BookOpen, Smile, Moon, TrendingUp, Activity, Dumbbell, Banknote } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -103,7 +103,7 @@ const Dashboard = () => {
         <StatCard icon={Smile} label="Mood" value={todayMood?.emoji || '—'} sub={todayMood?.mood || 'not logged'} color="text-tertiary" bg="bg-tertiary/5 dark:bg-tertiary/10" />
         <StatCard icon={Moon} label="Sleep" value={lastSleep ? `${lastSleep.duration}h` : '—'} sub={lastSleep ? `Quality ${lastSleep.quality}/5` : 'no data'} color="text-primary" bg="bg-blue-50 dark:bg-blue-900/10" progress={lastSleep ? (lastSleep.duration / SLEEP_GOAL_HOURS) * 100 : undefined} />
         <StatCard icon={Dumbbell} label="Exercise" value={todayHealth ? `${todayHealth.exercise}m` : '—'} sub={todayHealth ? `💧 ${todayHealth.water} cups` : 'not logged'} color="text-accent" bg="bg-green-50 dark:bg-green-900/10" progress={waterProgress} />
-        <StatCard icon={DollarSign} label="Month Spend" value={`$${monthExpenses.toFixed(0)}`} sub="this month" color="text-orange-500" bg="bg-orange-50 dark:bg-orange-900/10" />
+        <StatCard icon={Banknote} label="Month Spend" value={`Rp ${Math.round(monthExpenses).toLocaleString('id-ID')}`} sub="this month" color="text-orange-500" bg="bg-orange-50 dark:bg-orange-900/10" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -151,11 +151,9 @@ const Dashboard = () => {
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Add Task', icon: CheckSquare, color: 'primary', path: '/tasks' },
-              { label: 'Log Mood', icon: Smile, color: 'secondary', path: '/trackers' },
               { label: 'Study Session', icon: BookOpen, color: 'tertiary', path: '/study-log' },
-              { label: 'Log Sleep', icon: Moon, color: 'ghost', path: '/trackers' },
-              { label: 'Log Health', icon: Dumbbell, color: 'outline', path: '/trackers' },
-              { label: 'Log Finance', icon: DollarSign, color: 'ghost', path: '/trackers' },
+              { label: 'Log Exercise', icon: Dumbbell, color: 'outline', path: '/mytrace' },
+              { label: 'Log Finance', icon: Banknote, color: 'ghost', path: '/mytrace' },
             ].map(({ label, icon, color, path }) => {
               const Icon = icon;
               return (
