@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 import { Plus, Moon, Trash2, Droplets, Dumbbell, Banknote, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
@@ -63,6 +64,18 @@ const Trackers = () => {
   const [financeErrors, setFinanceErrors] = useState({});
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const { toasts, addToast, removeToast } = useToast();
+
+  const moodTrendData = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - (6 - i));
+      const dateStr = d.toISOString().split('T')[0];
+      const entries = moodLog.filter(e => e.date === dateStr);
+      const avg = entries.length ? parseFloat((entries.reduce((s, e) => s + e.intensity, 0) / entries.length).toFixed(1)) : null;
+      return { day: d.toLocaleDateString('en-US', { weekday: 'short' }), intensity: avg };
+    });
+  }, [moodLog]);
 
   const persistMood = (updated) => { setMoodLog(updated); saveData('moodLog', updated); };
   const persistSleep = (updated) => { setSleepLog(updated); saveData('sleepLog', updated); };
@@ -198,6 +211,17 @@ const Trackers = () => {
       {/* ── MOOD TAB ── */}
       {tab === 'mood' && (
         <div className="grid gap-3">
+          <Card>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Mood Intensity — Last 7 Days</p>
+            <ResponsiveContainer width="100%" height={120}>
+              <LineChart data={moodTrendData} margin={{ top: 4, right: 8, left: -28, bottom: 0 }}>
+                <XAxis dataKey="day" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(v) => (v !== null ? [`${v}/5`, 'Intensity'] : ['—', 'Intensity'])} />
+                <Line type="monotone" dataKey="intensity" stroke="#7c3aed" strokeWidth={2} dot={{ r: 3, fill: '#7c3aed' }} connectNulls activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
           {moodLog.length === 0 && <Card><p className="text-center text-gray-400 py-4">No mood entries yet. Log your mood!</p></Card>}
           {moodLog.map(entry => (
             <Card key={entry.id} className="flex items-center gap-4">
