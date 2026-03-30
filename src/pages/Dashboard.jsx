@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckSquare, Target, BookOpen, TrendingUp, Activity, Dumbbell, Banknote, Smile, Moon } from 'lucide-react';
+import { CheckSquare, Target, BookOpen, TrendingUp, Activity, Dumbbell, Banknote, Smile, Moon, Map } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -70,6 +70,7 @@ const Dashboard = () => {
   const [studyLog] = useState(() => getData('studyLog', []));
   const [healthLog] = useState(() => getData('healthLog', []));
   const [financeLog] = useState(() => getData('financeLog', []));
+  const [japanPlans] = useState(() => getData('japanPlans', []));
 
   // Mood & Sleep quick-log state
   const [moodLog, setMoodLog] = useState(() => getData('moodLog', []));
@@ -147,6 +148,12 @@ const Dashboard = () => {
   const habitProgress = habits.length > 0 ? (habitsCompletedToday / habits.length) * 100 : 0;
   const studyProgress = Math.min(100, (todayStudy / STUDY_GOAL_MINS) * 100);
   const waterProgress = todayHealth ? Math.min(100, (todayHealth.water / WATER_GOAL_CUPS) * 100) : 0;
+
+  const japanTotal = japanPlans.length;
+  const japanCompleted = japanPlans.filter(p => p.status === 'completed').length;
+  const japanInProgress = japanPlans.filter(p => p.status === 'in-progress').length;
+  const japanNotStarted = japanPlans.filter(p => p.status === 'not-started').length;
+  const japanPct = japanTotal > 0 ? Math.round((japanCompleted / japanTotal) * 100) : 0;
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -241,6 +248,44 @@ const Dashboard = () => {
           </div>
         </Card>
       </div>
+
+      {/* MYJapan Plans Summary */}
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-heading font-semibold text-text-dark dark:text-text-light flex items-center gap-2">
+            <Map size={18} className="text-primary" /> 🇯🇵 MYJapan Plans
+          </h3>
+          <Button variant="ghost" onClick={() => navigate('/myjapan-plans')} className="py-1.5 px-3 text-xs">
+            View Plans
+          </Button>
+        </div>
+        {japanTotal === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-2">No Japan plans added yet.</p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Overall Progress</span>
+              <span className="text-lg font-bold font-mono text-primary">{japanPct}%</span>
+            </div>
+            <div className="progress-track mb-4">
+              <div className="progress-bar" style={{ width: `${japanPct}%` }} />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Completed', value: japanCompleted, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/10' },
+                { label: 'In Progress', value: japanInProgress, color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/10' },
+                { label: 'Not Started', value: japanNotStarted, color: 'text-gray-400', bg: 'bg-gray-50 dark:bg-white/5' },
+              ].map(({ label, value, color, bg }) => (
+                <div key={label} className={`text-center p-2 rounded-xl ${bg}`}>
+                  <p className={`text-xl font-bold font-mono ${color}`}>{value}</p>
+                  <p className="text-xs text-gray-400">{label}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-3 text-center">{japanCompleted} of {japanTotal} plans completed</p>
+          </>
+        )}
+      </Card>
 
       {/* M&S Trace — Quick Mood & Sleep Log */}
       <Card>
