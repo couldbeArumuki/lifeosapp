@@ -10,6 +10,7 @@ A beautiful personal dashboard for tracking your life's progress. No authenticat
 - 🇯🇵 **Japanese Learning** — JLPT vocabulary & kanji tracker
 - 📝 **Study Log** — Log study sessions by subject
 - 💪 **MYTrace** — Exercise and finance tracking with Rupiah (Rp) format
+- 😊 **M&S Trace** — Mood and sleep tracking with trend charts
 - 🏆 **Goals** — Goal setting with progress bars
 - 📈 **Analytics** — Visual insights and trends
 - 🌐 **Public Profile** — Read-only shareable view
