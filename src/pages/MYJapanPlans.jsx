@@ -127,10 +127,19 @@ const StatusIcon = ({ status, size = 16 }) => {
   return <Circle size={size} className="text-gray-300 dark:text-gray-600 flex-shrink-0" />;
 };
 
+const progressBarColors = {
+  green: 'bg-accent',
+  yellow: 'bg-yellow-400',
+  red: 'bg-red-400',
+  purple: 'bg-secondary',
+  pink: 'bg-tertiary',
+  blue: 'bg-primary',
+};
+
 const ProgressBar = ({ value, color = 'primary' }) => (
   <div className="h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
     <div
-      className={`h-full rounded-full transition-all duration-500 ${color === 'green' ? 'bg-accent' : color === 'yellow' ? 'bg-yellow-400' : color === 'red' ? 'bg-red-400' : color === 'purple' ? 'bg-secondary' : 'bg-gradient-to-r from-primary to-secondary'}`}
+      className={`h-full rounded-full transition-all duration-500 ${progressBarColors[color] || 'bg-gradient-to-r from-primary to-secondary'}`}
       style={{ width: `${value}%` }}
     />
   </div>
@@ -351,7 +360,7 @@ const MYJapanPlans = () => {
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10'
             }`}
           >
-            {tab === 'All' ? 'All' : (categoryMeta[tab]?.emoji + ' ' + tab)}
+            {tab === 'All' ? 'All' : (categoryMeta[tab]?.emoji + ' ' + (categoryMeta[tab]?.label || tab))}
           </button>
         ))}
       </div>
