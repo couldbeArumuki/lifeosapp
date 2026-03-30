@@ -8,6 +8,7 @@ A beautiful personal dashboard for tracking your life's progress. No authenticat
 - ✅ **Tasks** — To-do list with priorities and status
 - 🎯 **Habits** — Daily habit tracker with streaks
 - 🇯🇵 **Japanese Learning** — JLPT vocabulary & kanji tracker
+- 🗾 **MYJapan Plans** — Comprehensive Japanese learning roadmap with checklist system covering Foundation → JLPT N5–N1, kanji, vocabulary, grammar, listening, speaking, reading & writing. Add/edit/delete items with status tracking (not started / in progress / completed), priorities, due dates, notes, and progress bars. Data stored in `localStorage` under key `japanPlans`. Route: `/myjapan-plans`
 - 📝 **Study Log** — Log study sessions by subject
 - 📊 **Trackers** — Mood, sleep, health and finance tracking
 - 🏆 **Goals** — Goal setting with progress bars
