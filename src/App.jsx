@@ -6,8 +6,7 @@ import Tasks from './pages/Tasks';
 import Habits from './pages/Habits';
 import JapaneseLearning from './pages/JapaneseLearning';
 import StudyLog from './pages/StudyLog';
-import MYTrace from './pages/MYTrace';
-import MSTrace from './pages/MSTrace';
+import Trackers from './pages/Trackers';
 import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
 import TodoList from './pages/TodoList';
@@ -24,8 +23,7 @@ function App() {
           <Route element={<DashboardLayout><Habits /></DashboardLayout>} path="/habits" />
           <Route element={<DashboardLayout><JapaneseLearning /></DashboardLayout>} path="/japanese-learning" />
           <Route element={<DashboardLayout><StudyLog /></DashboardLayout>} path="/study-log" />
-          <Route element={<DashboardLayout><MYTrace /></DashboardLayout>} path="/mytrace" />
-          <Route element={<DashboardLayout><MSTrace /></DashboardLayout>} path="/mstrace" />
+          <Route element={<DashboardLayout><Trackers /></DashboardLayout>} path="/trackers" />
           <Route element={<DashboardLayout><Goals /></DashboardLayout>} path="/goals" />
           <Route element={<DashboardLayout><Analytics /></DashboardLayout>} path="/analytics" />
           <Route element={<DashboardLayout><TodoList /></DashboardLayout>} path="/todo" />

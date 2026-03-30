@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckSquare, Target, BookOpen, TrendingUp, Activity, Dumbbell, Banknote, Smile } from 'lucide-react';
+import { CheckSquare, Target, BookOpen, TrendingUp, Activity, Dumbbell, Banknote } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -45,8 +45,6 @@ const Dashboard = () => {
   const [studyLog] = useState(() => getData('studyLog', []));
   const [healthLog] = useState(() => getData('healthLog', []));
   const [financeLog] = useState(() => getData('financeLog', []));
-  const [moodLog] = useState(() => getData('moodLog', []));
-  const [sleepLog] = useState(() => getData('sleepLog', []));
 
   const weeklyData = computeWeeklyData(studyLog, tasks);
 
@@ -56,12 +54,9 @@ const Dashboard = () => {
   const todayStudy = studyLog.filter(s => s.date === today).reduce((sum, s) => sum + s.duration, 0);
   const habitsCompletedToday = habits.filter(h => h.completedDates?.includes(today)).length;
   const todayHealth = healthLog.find(h => h.date === today);
+
   const monthStart = today.slice(0, 7);
   const monthExpenses = financeLog.filter(e => e.type === 'expense' && e.date?.startsWith(monthStart)).reduce((s, e) => s + e.amount, 0);
-
-  // M&S Trace summaries
-  const todayMood = moodLog.find(m => m.date === today);
-  const lastSleep = sleepLog[0];
 
   const { text: greetText, emoji: greetEmoji } = getGreeting();
 
@@ -95,39 +90,6 @@ const Dashboard = () => {
         <StatCard icon={BookOpen} label="Study Time" value={`${Math.round(todayStudy / 60 * 10) / 10}h`} sub="today" color="text-accent" bg="bg-accent/5 dark:bg-accent/10" progress={studyProgress} />
         <StatCard icon={Dumbbell} label="Exercise" value={todayHealth ? `${todayHealth.exercise}m` : '—'} sub={todayHealth ? `💧 ${todayHealth.water} cups` : 'not logged'} color="text-accent" bg="bg-green-50 dark:bg-green-900/10" progress={waterProgress} />
         <StatCard icon={Banknote} label="Month Spend" value={`Rp ${Math.round(monthExpenses).toLocaleString('id-ID')}`} sub="this month" color="text-orange-500" bg="bg-orange-50 dark:bg-orange-900/10" />
-      </div>
-
-      {/* Feature summaries */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/mytrace')}>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-green-50 dark:bg-green-900/20">
-              <Dumbbell size={18} className="text-accent" />
-            </div>
-            <div>
-              <h3 className="font-heading font-semibold text-text-dark dark:text-text-light text-sm">MYTrace</h3>
-              <p className="text-xs text-gray-400">Exercise &amp; Finance</p>
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {todayHealth ? `Exercise: ${todayHealth.exercise} min today` : 'No exercise logged today'} · Month spend: Rp {Math.round(monthExpenses).toLocaleString('id-ID')}
-          </p>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/mstrace')}>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20">
-              <Smile size={18} className="text-tertiary" />
-            </div>
-            <div>
-              <h3 className="font-heading font-semibold text-text-dark dark:text-text-light text-sm">M&amp;S Trace</h3>
-              <p className="text-xs text-gray-400">Mood &amp; Sleep</p>
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {todayMood ? `Mood: ${todayMood.emoji} ${todayMood.mood}` : 'No mood logged today'} · {lastSleep ? `Last sleep: ${lastSleep.duration}h` : 'No sleep data'}
-          </p>
-        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -175,8 +137,8 @@ const Dashboard = () => {
             {[
               { label: 'Add Task', icon: CheckSquare, color: 'primary', path: '/tasks' },
               { label: 'Study Session', icon: BookOpen, color: 'tertiary', path: '/study-log' },
-              { label: 'Log Exercise', icon: Dumbbell, color: 'outline', path: '/mytrace' },
-              { label: 'Log Mood', icon: Smile, color: 'ghost', path: '/mstrace' },
+              { label: 'Trackers', icon: Activity, color: 'outline', path: '/trackers' },
+              { label: 'Goals', icon: Banknote, color: 'ghost', path: '/goals' },
             ].map(({ label, icon, color, path }) => {
               const Icon = icon;
               return (
