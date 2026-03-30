@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, Target, BookOpen, PenLine,
   Activity, Trophy, BarChart3, Globe, Menu, X, Sun, Moon,
-  ChevronRight, Palette, ClipboardList, Music2, HeartPulse
+  ChevronRight, Palette, ClipboardList, Music2
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
@@ -13,8 +13,7 @@ const navItems = [
   { path: '/habits', label: 'Habits', icon: Target },
   { path: '/japanese-learning', label: 'Japanese', icon: BookOpen },
   { path: '/study-log', label: 'Study Log', icon: PenLine },
-  { path: '/mytrace', label: 'MYTrace', icon: Activity },
-  { path: '/mstrace', label: 'M&S Trace', icon: HeartPulse },
+  { path: '/trackers', label: 'Trackers', icon: Activity },
   { path: '/goals', label: 'Goals', icon: Trophy },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/todo', label: 'Todo List', icon: ClipboardList },
