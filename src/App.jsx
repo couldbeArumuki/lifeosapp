@@ -11,7 +11,6 @@ import Goals from './pages/Goals';
 import Analytics from './pages/Analytics';
 import TodoList from './pages/TodoList';
 import Music from './pages/Music';
-import PublicProfile from './pages/PublicProfile';
 import MYJapanPlans from './pages/MYJapanPlans';
 
 function App() {
@@ -30,7 +29,6 @@ function App() {
           <Route element={<DashboardLayout><TodoList /></DashboardLayout>} path="/todo" />
           <Route element={<DashboardLayout><Music /></DashboardLayout>} path="/music" />
           <Route element={<DashboardLayout><MYJapanPlans /></DashboardLayout>} path="/myjapan-plans" />
-          <Route element={<PublicProfile />} path="/public" />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
