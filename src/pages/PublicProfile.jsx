@@ -4,7 +4,7 @@ import { Globe, Target, Music2, Droplets, Dumbbell, Heart, Code2, User } from 'l
 
 const MJ_ALBUM_ID = '3OBhnTLrvkoEEETjFA3Qfk';
 
-const moodEmoji = { happy: '😊', focused: '🎯', motivated: '🚀', calm: '🌿', tired: '😴', anxious: '��' };
+const moodEmoji = { happy: '😊', focused: '🎯', motivated: '🚀', calm: '🌿', tired: '😴', anxious: '😰' };
 const statusIcon = { completed: '✅', 'in-progress': '⏳', 'not-started': '⭕' };
 const statusLabel = { completed: 'Completed', 'in-progress': 'In Progress', 'not-started': 'Not Started' };
 const priorityEmoji = { high: '🔥', medium: '⭐', low: '🌸' };
@@ -606,6 +606,13 @@ const StarRating = ({ value }) => (
   </div>
 );
 
+const handleAlbumImgError = (e) => {
+  e.currentTarget.onerror = null;
+  e.currentTarget.style.display = 'none';
+  const fallback = e.currentTarget.nextElementSibling;
+  if (fallback) fallback.style.display = 'flex';
+};
+
 const FavoriteAlbumCard = ({ album, isMasc }) => {
   const text = isMasc ? 'masc-text' : 'gyaru-text';
   const titleCls = isMasc ? 'masc-title' : 'gyaru-title';
@@ -624,7 +631,7 @@ const FavoriteAlbumCard = ({ album, isMasc }) => {
             src={album.coverUrl}
             alt={album.title}
             style={{ width: '110px', height: '110px', objectFit: 'cover', borderRadius: coverRadius, border: coverBorder, boxShadow: coverShadow }}
-            onError={e => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling.style.display = 'flex'; }}
+            onError={handleAlbumImgError}
           />
         ) : null}
         <div style={{ width: '110px', height: '110px', borderRadius: coverRadius, background: fallbackBg, display: album?.coverUrl ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px' }}>
@@ -1174,7 +1181,7 @@ const PublicProfile = () => {
               allowFullScreen
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              title="Michael Jackson - Thriller (Favorite Album)"
+              title="Spotify Album Embed — Developer Favorite"
             />
           </div>
 
