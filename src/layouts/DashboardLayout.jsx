@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, Target, BookOpen, PenLine,
   Activity, Trophy, BarChart3, Menu, X, Sun, Moon,
-  ChevronRight, ClipboardList, Music2, Map, FileText, Sparkles
+  ChevronRight, Music2, Map, FileText, Sparkles
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
@@ -16,7 +16,6 @@ const navItems = [
   { path: '/trackers', label: 'Trackers', icon: Activity, emoji: '📊' },
   { path: '/goals', label: 'Goals', icon: Trophy, emoji: '🏆' },
   { path: '/analytics', label: 'Analytics', icon: BarChart3, emoji: '📈' },
-  { path: '/todo', label: 'Todo List', icon: ClipboardList, emoji: '📋' },
   { path: '/music', label: 'Music', icon: Music2, emoji: '🎵' },
   { path: '/myjapan-plans', label: 'MYJapan Plans', icon: Map, emoji: '🗾' },
   { path: '/recap', label: 'Recap', icon: FileText, emoji: '🌟' },
