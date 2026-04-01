@@ -9,7 +9,7 @@ export const ThemeProvider = ({ children }) => {
   });
 
   const [accentKey, setAccentKey] = useState(() => {
-    return localStorage.getItem('lifeos-accent') || 'blue';
+    return localStorage.getItem('lifeos-accent') || 'gyaru';
   });
 
   const accent = ACCENT_THEMES.find(t => t.key === accentKey) || ACCENT_THEMES[0];
