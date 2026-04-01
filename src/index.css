@@ -73,12 +73,61 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.10);
   }
   .dark .card-hover:hover {
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.35);
   }
+
+  /* Colorful gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glowing border on hover */
+  .glow-hover {
+    transition: box-shadow 0.25s ease;
+  }
+  .glow-hover:hover {
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 255, 63, 164), 0.25);
+  }
+
+  /* Sparkle shimmer */
+  .shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2.2s infinite;
+  }
+
+  /* Rainbow border */
+  .rainbow-border {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+  .rainbow-border::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #FF3FA4, #FF85DC, #FFD700, #38BDF8, #A855F7);
+    z-index: -1;
+  }
+
+  /* Colorful focus ring */
+  button:focus-visible, a:focus-visible {
+    outline: 2px solid var(--color-primary, #FF3FA4);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
 
 @keyframes fadeIn {

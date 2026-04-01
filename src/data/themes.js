@@ -1,4 +1,5 @@
 export const ACCENT_THEMES = [
+  { key: 'gyaru',  label: 'Gyaru 💖',     primary: '#FF3FA4', secondary: '#FF85DC' },
   { key: 'blue',   label: 'Ocean Blue',   primary: '#6B9BD1', secondary: '#B19CD9' },
   { key: 'green',  label: 'Forest Green', primary: '#5BAD8F', secondary: '#7EC8A3' },
   { key: 'rose',   label: 'Rose Petal',   primary: '#E07B8A', secondary: '#F4A6C1' },

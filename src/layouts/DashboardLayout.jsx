@@ -3,23 +3,23 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, Target, BookOpen, PenLine,
   Activity, Trophy, BarChart3, Menu, X, Sun, Moon,
-  ChevronRight, Palette, ClipboardList, Music2, Map, FileText
+  ChevronRight, ClipboardList, Music2, Map, FileText, Sparkles
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { path: '/habits', label: 'Habits', icon: Target },
-  { path: '/japanese-learning', label: 'Japanese', icon: BookOpen },
-  { path: '/study-log', label: 'Study Log', icon: PenLine },
-  { path: '/trackers', label: 'Trackers', icon: Activity },
-  { path: '/goals', label: 'Goals', icon: Trophy },
-  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { path: '/todo', label: 'Todo List', icon: ClipboardList },
-  { path: '/music', label: 'Music', icon: Music2 },
-  { path: '/myjapan-plans', label: 'MYJapan Plans', icon: Map },
-  { path: '/recap', label: 'Recap', icon: FileText },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard, emoji: '🏠' },
+  { path: '/tasks', label: 'Tasks', icon: CheckSquare, emoji: '✅' },
+  { path: '/habits', label: 'Habits', icon: Target, emoji: '🎯' },
+  { path: '/japanese-learning', label: 'Japanese', icon: BookOpen, emoji: '🈶' },
+  { path: '/study-log', label: 'Study Log', icon: PenLine, emoji: '📝' },
+  { path: '/trackers', label: 'Trackers', icon: Activity, emoji: '📊' },
+  { path: '/goals', label: 'Goals', icon: Trophy, emoji: '🏆' },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3, emoji: '📈' },
+  { path: '/todo', label: 'Todo List', icon: ClipboardList, emoji: '📋' },
+  { path: '/music', label: 'Music', icon: Music2, emoji: '🎵' },
+  { path: '/myjapan-plans', label: 'MYJapan Plans', icon: Map, emoji: '🗾' },
+  { path: '/recap', label: 'Recap', icon: FileText, emoji: '🌟' },
 ];
 
 const DashboardLayout = ({ children }) => {
@@ -42,35 +42,38 @@ const DashboardLayout = ({ children }) => {
       <aside className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-white/10 z-30 transform transition-transform duration-300 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 lg:static flex flex-col`}>
-        <div className="p-6 border-b border-gray-100 dark:border-white/10">
+        {/* Sidebar header with gradient */}
+        <div className="p-6 border-b border-gray-100 dark:border-white/10 bg-gradient-to-r from-primary/10 via-secondary/10 to-transparent dark:from-primary/20 dark:via-secondary/10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30">
-              <span className="text-white font-bold text-sm">L</span>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/40 animate-float">
+              <span className="text-white font-bold text-base">✨</span>
             </div>
             <div>
               <h1 className="font-heading font-bold text-text-dark dark:text-text-light text-lg leading-none">LifeOS</h1>
-              <p className="text-xs text-gray-400">Personal Dashboard</p>
+              <p className="text-xs text-primary/70 dark:text-secondary/80 font-medium">✨ Personal Dashboard</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map(({ path, label, icon }) => {
-            const NavIcon = icon;
+        <nav className="flex-1 p-4 space-y-0.5 overflow-y-auto">
+          {navItems.map(({ path, label, emoji }) => {
+            const active = isActive(path);
             return (
               <Link
                 key={path}
                 to={path}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                  isActive(path)
-                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-dark dark:hover:text-text-light'
+                  active
+                    ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-[1.02]'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-primary/8 dark:hover:bg-white/5 hover:text-primary dark:hover:text-secondary hover:translate-x-1'
                 }`}
               >
-                <NavIcon size={18} />
+                <span className={`text-base transition-transform duration-200 ${active ? '' : 'group-hover:scale-125'}`}>
+                  {emoji}
+                </span>
                 <span className="flex-1">{label}</span>
-                {isActive(path) && <ChevronRight size={14} />}
+                {active && <ChevronRight size={14} className="animate-pulse" />}
               </Link>
             );
           })}
@@ -80,9 +83,9 @@ const DashboardLayout = ({ children }) => {
           {/* Theme picker toggle */}
           <button
             onClick={() => setShowThemePicker(v => !v)}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-dark dark:hover:text-text-light transition-all duration-200"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-primary/8 dark:hover:bg-white/5 hover:text-primary dark:hover:text-secondary transition-all duration-200"
           >
-            <Palette size={18} />
+            <Sparkles size={18} />
             <span>Accent Color</span>
           </button>
 
@@ -102,7 +105,7 @@ const DashboardLayout = ({ children }) => {
 
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-text-dark dark:hover:text-text-light transition-all duration-200"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-primary/8 dark:hover:bg-white/5 hover:text-primary dark:hover:text-secondary transition-all duration-200"
           >
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
             <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
@@ -115,12 +118,15 @@ const DashboardLayout = ({ children }) => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2 rounded-xl hover:bg-primary/10 dark:hover:bg-white/10 transition-colors text-primary"
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <div>
-              <h2 className="font-heading font-semibold text-text-dark dark:text-text-light text-base capitalize">
+              <h2 className="font-heading font-semibold text-text-dark dark:text-text-light text-base capitalize flex items-center gap-1.5">
+                <span className="text-base">
+                  {navItems.find(n => n.path === location.pathname)?.emoji || '✨'}
+                </span>
                 {navItems.find(n => n.path === location.pathname)?.label || 'LifeOS'}
               </h2>
               <p className="text-xs text-gray-400 hidden sm:block">
@@ -132,12 +138,12 @@ const DashboardLayout = ({ children }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-500 dark:text-gray-400"
+              className="p-2 rounded-xl hover:bg-primary/10 dark:hover:bg-white/10 transition-colors text-primary dark:text-secondary"
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
-              <span className="text-white text-xs font-bold">Z</span>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md shadow-primary/30 ring-2 ring-primary/20">
+              <span className="text-white text-sm font-bold">Z</span>
             </div>
           </div>
         </header>

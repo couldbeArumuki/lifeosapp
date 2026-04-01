@@ -13,10 +13,12 @@ import TodoList from './pages/TodoList';
 import Music from './pages/Music';
 import MYJapanPlans from './pages/MYJapanPlans';
 import Recap from './pages/Recap';
+import ClickEffect from './components/ClickEffect';
 
 function App() {
   return (
     <ThemeProvider>
+      <ClickEffect />
       <BrowserRouter basename="/lifeosapp">
         <Routes>
           <Route element={<DashboardLayout><Dashboard /></DashboardLayout>} path="/" />
