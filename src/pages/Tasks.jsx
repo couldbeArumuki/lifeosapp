@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, Swords, ToggleLeft, ToggleRight } from 'lucide-react';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -12,6 +12,7 @@ import { getData, saveData } from '../utils/localStorage';
 const priorityColor = { high: 'red', medium: 'yellow', low: 'green' };
 const statusColor = { completed: 'green', 'in-progress': 'blue', todo: 'gray' };
 const CATEGORIES = ['Learning', 'Health', 'Personal', 'Study', 'Work', 'Other'];
+const QUESTS_KEY = 'dailyQuests';
 
 const defaultForm = { title: '', priority: 'medium', status: 'todo', dueDate: '', category: 'Personal', completed: false };
 
@@ -26,6 +27,51 @@ const Tasks = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [errors, setErrors] = useState({});
   const { toasts, addToast, removeToast } = useToast();
+
+  // ── Daily Quest state ──────────────────────────────────────────────────────
+  const [quests, setQuests] = useState(() => getData(QUESTS_KEY, []));
+  const [showQuestModal, setShowQuestModal] = useState(false);
+  const [questTitle, setQuestTitle] = useState('');
+  const [questError, setQuestError] = useState('');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const persistQuests = (updated) => { setQuests(updated); saveData(QUESTS_KEY, updated); };
+
+  const addQuest = (e) => {
+    e.preventDefault();
+    const title = questTitle.trim();
+    if (!title) { setQuestError('Quest title is required'); return; }
+    const newQuest = { id: Date.now(), title, active: true, completedDates: [] };
+    persistQuests([...quests, newQuest]);
+    setQuestTitle('');
+    setQuestError('');
+    setShowQuestModal(false);
+    addToast('Daily quest added!', 'success');
+  };
+
+  const toggleQuestActive = (id) => {
+    persistQuests(quests.map(q => q.id === id ? { ...q, active: !q.active } : q));
+  };
+
+  const toggleQuestToday = (id) => {
+    persistQuests(quests.map(q => {
+      if (q.id !== id) return q;
+      const done = q.completedDates.includes(today);
+      const completedDates = done
+        ? q.completedDates.filter(d => d !== today)
+        : [...q.completedDates, today];
+      return { ...q, completedDates };
+    }));
+  };
+
+  const deleteQuest = (id) => {
+    persistQuests(quests.filter(q => q.id !== id));
+    addToast('Quest removed.', 'info');
+  };
+
+  const activeQuests = quests.filter(q => q.active);
+  const questsDoneToday = activeQuests.filter(q => q.completedDates.includes(today)).length;
 
   const persist = (updated) => { setTasks(updated); saveData('tasks', updated); };
 
@@ -87,6 +133,71 @@ const Tasks = () => {
         <Button variant="primary" onClick={openAdd}><Plus size={16} /> Add Task</Button>
       </div>
 
+      {/* ── Daily Quests ──────────────────────────────────────────── */}
+      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-2xl p-4 border border-primary/20 dark:border-primary/30">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Swords size={18} className="text-primary" />
+            <h2 className="font-heading font-semibold text-base text-text-dark dark:text-text-light">Daily Quests</h2>
+            {activeQuests.length > 0 && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">{questsDoneToday}/{activeQuests.length} done today</span>
+            )}
+          </div>
+          <button
+            onClick={() => { setQuestTitle(''); setQuestError(''); setShowQuestModal(true); }}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus size={13} /> Add Quest
+          </button>
+        </div>
+
+        {quests.length === 0 && (
+          <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-2">No daily quests yet. Add one that repeats every day!</p>
+        )}
+
+        <div className="space-y-2">
+          {quests.map(quest => {
+            const doneToday = quest.completedDates.includes(today);
+            const totalDone = quest.completedDates.length;
+            return (
+              <div
+                key={quest.id}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all ${quest.active ? 'bg-white dark:bg-white/5' : 'bg-gray-50 dark:bg-white/3 opacity-60'}`}
+              >
+                <button
+                  onClick={() => quest.active && toggleQuestToday(quest.id)}
+                  disabled={!quest.active}
+                  className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${doneToday && quest.active ? 'bg-primary border-primary' : quest.active ? 'border-gray-300 dark:border-gray-600 hover:border-primary' : 'border-gray-200 dark:border-gray-700'}`}
+                >
+                  {doneToday && quest.active && <Check size={11} className="text-white" />}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${!quest.active ? 'line-through text-gray-400' : doneToday ? 'text-gray-400 line-through' : 'text-text-dark dark:text-text-light'}`}>
+                    {quest.title}
+                  </p>
+                  <p className="text-xs text-gray-400">{totalDone} day{totalDone !== 1 ? 's' : ''} completed · {quest.active ? 'Active' : 'Inactive'}</p>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => toggleQuestActive(quest.id)}
+                    className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-primary transition-colors"
+                    title={quest.active ? 'Deactivate quest' : 'Activate quest'}
+                  >
+                    {quest.active ? <ToggleRight size={16} className="text-primary" /> : <ToggleLeft size={16} />}
+                  </button>
+                  <button
+                    onClick={() => deleteQuest(quest.id)}
+                    className="p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex gap-2 flex-wrap">
         {['all', 'todo', 'in-progress', 'completed'].map(f => (
           <button key={f} onClick={() => setFilter(f)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${filter === f ? 'bg-primary text-white' : 'bg-white dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10'}`}>
@@ -123,6 +234,24 @@ const Tasks = () => {
           </Card>
         ))}
       </div>
+
+      {/* Add Quest Modal */}
+      <Modal isOpen={showQuestModal} onClose={() => setShowQuestModal(false)} title="Add Daily Quest" size="sm">
+        <form onSubmit={addQuest} className="space-y-4">
+          <Input
+            label="Quest Title"
+            placeholder="e.g. Read 20 pages"
+            value={questTitle}
+            onChange={e => { setQuestTitle(e.target.value); setQuestError(''); }}
+            error={questError}
+          />
+          <p className="text-xs text-gray-400">Daily quests repeat every day automatically. Toggle them inactive when you want to pause.</p>
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setShowQuestModal(false)} className="flex-1 justify-center">Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1 justify-center">Add Quest</Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Add/Edit Modal */}
       <Modal isOpen={showModal} onClose={closeModal} title={editTask !== null ? 'Edit Task' : 'Add Task'}>
