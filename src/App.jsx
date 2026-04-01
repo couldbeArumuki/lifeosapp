@@ -12,6 +12,7 @@ import Analytics from './pages/Analytics';
 import TodoList from './pages/TodoList';
 import Music from './pages/Music';
 import MYJapanPlans from './pages/MYJapanPlans';
+import Recap from './pages/Recap';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route element={<DashboardLayout><TodoList /></DashboardLayout>} path="/todo" />
           <Route element={<DashboardLayout><Music /></DashboardLayout>} path="/music" />
           <Route element={<DashboardLayout><MYJapanPlans /></DashboardLayout>} path="/myjapan-plans" />
+          <Route element={<Recap />} path="/recap" />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
