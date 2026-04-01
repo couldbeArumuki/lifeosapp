@@ -42,12 +42,11 @@ const Habits = () => {
     const dateSet = new Set(dates);
     let count = 0;
     const d = new Date();
-    while (count <= dateSet.size) {
-      const ds = d.toISOString().split('T')[0];
-      if (dateSet.has(ds)) {
-        count++;
-        d.setDate(d.getDate() - 1);
-      } else break;
+    let ds = d.toISOString().split('T')[0];
+    while (dateSet.has(ds)) {
+      count++;
+      d.setDate(d.getDate() - 1);
+      ds = d.toISOString().split('T')[0];
     }
     return count;
   };
