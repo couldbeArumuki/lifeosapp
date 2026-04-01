@@ -123,6 +123,18 @@
     outline: 2px solid var(--color-primary, #FF3FA4);
     outline-offset: 2px;
   }
+
+  /* Pop animation on click */
+  .animate-pop {
+    animation: pop 0.22s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.92); }
+  70%  { transform: scale(1.07); }
+  100% { transform: scale(1); }
 }
 
 @keyframes shimmer {
